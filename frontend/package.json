@@ -1,0 +1,7 @@
+{
+  "name": "my-git-cms-frontend",
+  "version": "1.0.0",
+  "devDependencies": {
+    "shadow-cljs": "2.28.18"
+  }
+}

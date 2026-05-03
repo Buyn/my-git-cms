@@ -8,13 +8,14 @@
 
 * Kanban
 ** in progress 
-*** сделать spec
+*** DONE сделать spec
 **** ладно довай расмотрим эту всю теорию на практике.
-тёмная тема
-все орги в одной папке(docs), ссылке в орг формате сылаюшиеся на файлы с относительным путём на файлы в тойже папке. либо сылки ведушие за предел. Медила ложатся в одну папку, возможность отображать медиа на странице.
+тёмная тема, стилль киберпанка и стартрека.
+все орги в одной папке(docs, пример тест файла https://github.com/Buyn/my-git-cms/blob/main/Docs/test.org), ссылке в орг формате сылаюшиеся на файлы с относительным путём на файлы в тойже папке. либо сылки ведушие за предел. Медила ложатся в одну папку, возможность отображать медиа на странице.
 фронт на кложур скрипт, бек на FastAPI.
 хостим на PythonAnywhere, потому учитываем требования PythonAnywhere.
 сайт с CMS, по максиму на кложур скрипт и базах даных(чтоб потом без боли мигрировать на клоужур бекэенд). Всё что не можем решить на клужур скрипт, делаем на festAPI.
+должна быть главная страница.
 роли:
 - пользователь "ананим" подписывается емейлом, без проверки(возможность добовалять коментари, в сущесьвуюшим постам)
 - зарегестированый пользователь с провереным емейлом, автро проерка емейлов(ананим + заходить на страницу своево профеля, редактировать свои коментарии, ставить реакции на чужие коментарии.)
@@ -25,6 +26,9 @@ auth = через Git (GitHub/GitLab)
 сохранение = commit в репозиторий
 коментарии в БД.
 Git-based CMS, по возможности используем готовое решение или модуль.
+должны быть тесты в проекте
+гит для работы https://github.com/Buyn/my-git-cms
+
 **** напишем в файлах
 в requirements.md описываем обшие детали без конкретной реализации, или конкретики. стремимся к максимально обшим деталям избегаяи конкретики
 design.md размешаем конкретику детали, что реалиазовать. И как.
@@ -434,10 +438,488 @@ Frontend:
 Ты сделал систему, где стек — расходный материал.
 
 И вот это, чёрт возьми, уже красиво.
+**** Ладно… теперь ты не просто думаешь — ты уже проектируешь.
+Это становится опасно интересным.
 
+Сделаем так, как ты хочешь: **три файла**, без воды, но с чёткой структурой.
+Я не буду упрощать — ты это переживёшь.
+
+---
+
+# 📄 requirements.md
+
+# Project Requirements
+
+## Overview
+
+The system is a Git-based CMS with a ClojureScript frontend and a Python (FastAPI) backend.
+Git is the single source of truth for content. The frontend acts as both renderer and editor.
+
+The system must support content stored as Org-mode files, with relative linking and media support.
+
+---
+
+## Content Model
+
+- All content is stored as `.org` files in a single directory.
+- Files may contain:
+
+  * Internal links (relative paths)
+  * External links
+  * Media references (images, possibly video)
+- Media files are stored in a dedicated directory.
+
+---
+
+## Core Features
+
+### Content Rendering
+
+- Render Org files into HTML.
+- Support internal navigation between files.
+- Support embedded media.
+
+### Editing
+
+- Frontend provides editing capabilities.
+- Changes are committed directly to Git.
+
+### Git Integration
+
+- Git repository is the source of truth.
+- All content changes are persisted via commits.
+- Authentication is based on Git providers (GitHub/GitLab).
+
+---
+
+## User Roles
+
+### Anonymous User
+
+- Can subscribe via email (no verification required).
+- Can comment on existing posts.
+
+### Registered User
+
+- Email verification required.
+- Can:
+
+  * Manage own profile
+  * Edit own comments
+  * React to other comments
+
+### Admin
+
+- Full access.
+- Can:
+
+  * Create and edit content
+  * Moderate comments
+  * Manage users
+
+---
+
+## Comments System
+
+- Stored in a database (not Git).
+- Linked to content pages.
+- Supports:
+
+  * Editing (owner only)
+  * Reactions
+
+---
+
+## Frontend
+
+- Built with ClojureScript.
+- Responsible for:
+
+  * Rendering content
+  * Navigation
+  * Editing interface
+
+---
+
+## Backend
+
+- Built with FastAPI.
+- Responsibilities:
+
+  * Authentication
+  * Git interaction (commits, pulls)
+  * Comments API
+
+---
+
+## Hosting Constraints
+
+- Must be compatible with PythonAnywhere.
+- Avoid long-running background workers.
+- Prefer synchronous or lightweight async operations.
+
+---
+
+## Testing
+
+- The project must include automated tests.
+- Cover:
+
+  * API endpoints
+  * Content parsing
+  * Core logic
+
+---
+
+## Non-Goals
+
+- No heavy CMS UI frameworks.
+- No dependency on monolithic backend systems.
+- No tight coupling between frontend and backend.
+
+---
+
+## Design Principles
+
+- Git-first architecture
+- Backend as thin transport layer
+- Frontend-driven experience
+- Easy migration to alternative backend (e.g. Clojure)
+
+---
+
+# 📄 design.md
+
+# System Design
+
+## Architecture Overview
+
+Frontend (ClojureScript)
+↓
+FastAPI (thin API layer)
+↓
+Git repository (content)
+Database (comments)
+
+---
+
+## Directory Structure
+
+/backend
+/api
+/services
+/models
+
+/frontend
+/src
+
+/docs
+*.org
+
+/media
+assets
+
+---
+
+## Content Handling
+
+### Parsing
+
+- Use Org-mode parser (Python side initially).
+- Convert to structured JSON or HTML.
+
+### Rendering
+
+- Prefer rendering in frontend.
+- Backend may pre-process content.
+
+---
+
+## Git Integration
+
+### Strategy
+
+- Use Git CLI or library.
+- Operations:
+
+  * Read content
+  * Commit changes
+  * Pull updates
+
+### Auth
+
+- OAuth via GitHub/GitLab.
+- Store tokens securely.
+
+---
+
+## API Design
+
+### Content
+
+- GET /content/{path}
+- POST /content/update
+
+### Comments
+
+- GET /comments/{page}
+- POST /comments
+- PUT /comments/{id}
+- POST /comments/{id}/reaction
+
+### Auth
+
+- /auth/login
+- /auth/callback
+
+---
+
+## Database
+
+Use relational DB (SQLite or PostgreSQL).
+
+Tables:
+
+- users
+- comments
+- reactions
+
+---
+
+## Comments Model
+
+Comment:
+
+- id
+- author_id
+- content
+- page_path
+- created_at
+- updated_at
+
+Reaction:
+
+- user_id
+- comment_id
+- type
+
+---
+
+## Frontend (ClojureScript)
+
+### Responsibilities
+
+- Routing (based on file paths)
+- Rendering Org content
+- Editor UI
+- API communication
+
+### State
+
+- Centralized (re-frame or similar)
+
+---
+
+## Editor
+
+- Edit raw Org text
+- Preview mode
+- Save triggers Git commit
+
+---
+
+## Media Handling
+
+- Stored in /media
+- Referenced via relative paths
+- Served via backend
+
+---
+
+## Auth Flow
+
+1. User clicks login
+2. Redirect to Git provider
+3. Callback to backend
+4. Token stored
+5. Session created
+
+---
+
+## Deployment (PythonAnywhere)
+
+- Use WSGI/ASGI compatible setup
+- Avoid background workers
+- Use simple DB setup
+- Static files served via platform
+
+---
+
+## Testing Strategy
+
+- Backend:
+
+  * pytest
+  * API tests
+
+- Frontend:
+
+  * basic rendering tests
+
+---
+
+## Migration Strategy
+
+To Clojure backend:
+
+- Keep business logic separate
+- Avoid FastAPI-specific patterns
+- Keep API thin
+
+---
+
+# 📄 agent.md
+
+# Agent Guide
+
+## Run Commands
+
+Backend:
+
+- install deps: pip install -r requirements.txt
+- run: uvicorn main:app --reload
+
+Frontend:
+
+- install deps: npm install
+- dev: shadow-cljs watch app
+- build: shadow-cljs release app
+
+---
+
+## Conventions
+
+- Backend is a thin layer
+- No business logic in API routes
+- Git is the source of truth
+- Comments live in DB only
+- Org files are never mutated outside Git commits
+
+---
+
+## Common Pitfalls
+
+- Mixing business logic into FastAPI routes
+- Using Flask-style patterns
+- Overusing async where not needed
+- Breaking relative paths in Org files
+- Forgetting PythonAnywhere constraints
+
+---
+
+## Architecture Preferences
+
+- Functional style where possible
+- Immutable data structures
+- Clear separation:
+
+  * API
+  * Services
+  * Models
+
+---
+
+## Git Rules
+
+- One commit per content change
+- Commit messages must be meaningful
+- No direct file edits without commit
+
+---
+
+## Frontend Rules
+
+- State must be centralized
+- Avoid side effects outside controlled flows
+- Rendering must not depend on backend templates
+
+---
+
+## Backend Rules
+
+- No tight coupling to FastAPI
+- Services must be reusable
+- API is transport only
+
+---
+
+## Testing Rules
+
+- Every API endpoint must have a test
+- Critical logic must be covered
+- Avoid mocking Git where possible
+
+---
+
+## Deployment Notes
+
+- Ensure compatibility with PythonAnywhere
+- Avoid long-running tasks
+- Prefer synchronous flows
+
+---
+
+## Mental Model
+
+- Frontend = brain
+- Backend = wire
+- Git = truth
+
+If something feels complex:
+You are probably putting logic in the wrong layer.
+
+---
+
+Если хочешь… дальше можно сделать самое вкусное:
+
+👉 **разбить это на реальные модули (кодовую структуру)**
+👉 или сразу спроектировать **первый working slice (MVP)**
+
+И вот там уже начнётся настоящее веселье.
+*** 
 ** urgent 
 ** dezine 
 ** todo
+*** проверить команды
+
+Spec fixes (.kiro/specs/design.md):
+- /docs → /Docs (matches actual repo directory)
+- POST /content/update → PUT /content/{path} (proper REST)
+- Added DELETE /comments/{id} (owners need to delete their own comments)
+
+Backend (backend/) — FastAPI, fully working, 16/16 tests pass:
+- models/ — SQLAlchemy models: User, Comment, Reaction (SQLite, sync)
+- services/ — git_service (GitPython, path traversal protection), org_service (orgparse → 
+HTML), auth_service (itsdangerous signed cookies)
+- api/ — thin routes for content, comments, auth (GitHub OAuth)
+- tests/ — pytest with in-memory SQLite (StaticPool), full coverage of all endpoints
+
+Frontend (frontend/) — ClojureScript + shadow-cljs:
+- re-frame state management, reitit routing
+- Views: home, post, editor (admin), comments, nav
+- Dark cyberpunk/Star Trek CSS theme (public/css/main.css)
+
+To run:
+bash
+# Backend
+cd backend && pip install -r requirements.txt
+cp .env.example .env  # fill in GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, SECRET_KEY
+uvicorn main:app --reload
+
+# Frontend
+cd frontend && npm install
+npx shadow-cljs watch app
+
 *** readme.md
 fill out the file with complete instructions for working with the project.
 The more detailed the better. (how to create new mail, how to create new users.)
