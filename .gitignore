@@ -1,0 +1,6 @@
+/backend/.env
+node_modules/
+__pycache__/
+.env
+/frontend/public/js/
+/frontend/.shadow-cljs/

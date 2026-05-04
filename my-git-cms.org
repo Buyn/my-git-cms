@@ -2,12 +2,155 @@
 ** md
 (find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/.kiro/specs/design.md")
 (find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/.kiro/specs/requirements.md")
-(find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/.kiro/specs/agent.md")
+(find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/README.md")
 ** content orgs
 (find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/Docs/test.org")
-
+** cfg
+(find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/backend/.env")
+** root
+(find-file-other-frame "/home/buyn/Dev/AI/kiro-proj/my-git-cms/.gitignore")
 * Kanban
 ** in progress 
+*** 
+git rm --cached backend/.env
+
+git rm --cached frontend/node_modules
+/home/buyn/Dev/AI/kiro-proj/my-git-cms/frontend/node_modules
+/home/buyn/Dev/AI/kiro-proj/my-git-cms/backend/.env
+
+удалить фаил из репозитория понятно а как целую папу?
+git rm --cached frontend/node_modules/* ?
+git rm --cached frontend/node_modules/. ?
+
+/home/buyn/Dev/AI/kiro-proj/my-git-cms/frontend/node_modules
+git rm -r --cached frontend/node_modules
+
+git rm -r --cached backend/__pycache__
+
+а если я хочу из репозитория убрать все папки __pycache__ не зависемо от пути. как мне это сделать?
+или нужно найти кажду и для каждой сделать команду?
+
+/home/buyn/Dev/AI/kiro-proj/my-git-cms/backend/__pycache__
+*** DONE 
+
+https://github.com/Buyn/my-git-cms/blob/main/Docs/hello.org
+
+https://buynmax.pythonanywhere.com/auth/callback?code=b70a65bfd61e3d9a8258
+
+
+buyn@ArchSRV % uvicorn main:app --reload --port 8000
+
+INFO:     Will watch for changes in these directories: ['/home/buyn/Dev/AI/kiro-proj/my-git-cms/backend']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [51809] using WatchFiles
+INFO:     Started server process [51811]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:56790 - "OPTIONS /content/list HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:56776 - "GET /auth/login HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:35714 - "OPTIONS /content/list HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:50088 - "OPTIONS /content/list HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:50954 - "GET /auth/login HTTP/1.1" 307 Temporary Redirect
+INFO:     127.0.0.1:44114 - "OPTIONS /content/list HTTP/1.1" 400 Bad Request
+
+
+on page console:
+Warning: ReactDOM.render is no longer supported in React 18. Use createRoot instead. Until you switch to the new API, your app will behave as if it's running React 17. Learn more: https://reactjs.org/link/switch-to-createroot <anonymous code>:1:147461
+shadow-cljs: #17 ready! browser.cljs:20:8
+Source map error: Error: request failed with status 404
+Stack in the worker:networkRequest@resource://devtools/client/shared/source-map-loader/utils/network-request.js:43:9
+
+Resource URL: http://localhost:8080/%3Canonymous%20code%3E
+Source Map URL: installHook.js.map
+XHR
+OPTIONS
+http://localhost:8000/content/list
+CORS Missing Allow Origin
+
+Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at http://localhost:8000/content/list. (Reason: CORS header ‘Access-Control-Allow-Origin’ missing). Status code: 400.
+Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at http://localhost:8000/content/list. (Reason: CORS request did not succeed). Status code: (null).
+
+on page:
+"NetworkError when attempting to fetch resource."
+
+** urgent 
+** dezine 
+** todo
+*** проверить команды
+
+Spec fixes (.kiro/specs/design.md):
+- /docs → /Docs (matches actual repo directory)
+- POST /content/update → PUT /content/{path} (proper REST)
+- Added DELETE /comments/{id} (owners need to delete their own comments)
+
+Backend (backend/) — FastAPI, fully working, 16/16 tests pass:
+- models/ — SQLAlchemy models: User, Comment, Reaction (SQLite, sync)
+- services/ — git_service (GitPython, path traversal protection), org_service (orgparse → 
+HTML), auth_service (itsdangerous signed cookies)
+- api/ — thin routes for content, comments, auth (GitHub OAuth)
+- tests/ — pytest with in-memory SQLite (StaticPool), full coverage of all endpoints
+
+Frontend (frontend/) — ClojureScript + shadow-cljs:
+- re-frame state management, reitit routing
+- Views: home, post, editor (admin), comments, nav
+- Dark cyberpunk/Star Trek CSS theme (public/css/main.css)
+
+To run:
+bash
+# Backend
+
+cd /home/buyn/Dev/AI/kiro-proj/my-git-cms/backend 
+python -m venv .venv && source .venv/bin/activate
+
+cd /home/buyn/Dev/AI/kiro-proj/my-git-cms
+source .venv/bin/activate
+pip install -r requirements.txt
+cd backend && pip install -r requirements.txt
+cp .env.example .env  # fill in GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, SECRET_KEY
+uvicorn main:app --reload
+
+# Frontend
+cd /home/buyn/Dev/AI/kiro-proj/my-git-cms
+cd /home/buyn/Dev/AI/kiro-proj/my-git-cms/frontend && npm install
+npx shadow-cljs watch app
+
+*** readme.md
+fill out the file with complete instructions for working with the project.
+The more detailed the better. (how to create new mail, how to create new users.)
+
+
+*** DONE 
+[:app] Build failure:
+The required namespace "react-dom" is not available, it was required by "reagent/dom.cljs".
+
+*** 
+
+buyn@ArchSRV % npx shadow-cljs watch app
+
+shadow-cljs - config: /home/buyn/Dev/AI/kiro-proj/my-git-cms/frontend/shadow-cljs.edn
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.jboss.threads.JBossExecutors (file:/home/buyn/.m2/repository/org/jboss/threads/jboss-threads/3.5.0.Final/jboss-threads-3.5.0.Final.jar)
+WARNING: Please consider reporting this to the maintainers of class org.jboss.threads.JBossExecutors
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+shadow-cljs - server version: 2.28.18 running at http://localhost:9630
+shadow-cljs - nREPL server started on port 34773
+shadow-cljs - watching build :app
+[:app] Configuring build.
+[:app] Compiling ...
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+[:app] Build completed. (181 files, 180 compiled, 0 warnings, 15.43s)
+
+
+can’t establish a connection to the server at localhost:8080.
+
+*** 
+rederect on git login to
+https://github.com/login/oauth/authorize?client_id=your-github-client-id&scope=read:user,user:email
+
+** backlog
+** done
 *** DONE сделать spec
 **** ладно довай расмотрим эту всю теорию на практике.
 тёмная тема, стилль киберпанка и стартрека.
@@ -886,47 +1029,6 @@ You are probably putting logic in the wrong layer.
 👉 или сразу спроектировать **первый working slice (MVP)**
 
 И вот там уже начнётся настоящее веселье.
-*** 
-** urgent 
-** dezine 
-** todo
-*** проверить команды
-
-Spec fixes (.kiro/specs/design.md):
-- /docs → /Docs (matches actual repo directory)
-- POST /content/update → PUT /content/{path} (proper REST)
-- Added DELETE /comments/{id} (owners need to delete their own comments)
-
-Backend (backend/) — FastAPI, fully working, 16/16 tests pass:
-- models/ — SQLAlchemy models: User, Comment, Reaction (SQLite, sync)
-- services/ — git_service (GitPython, path traversal protection), org_service (orgparse → 
-HTML), auth_service (itsdangerous signed cookies)
-- api/ — thin routes for content, comments, auth (GitHub OAuth)
-- tests/ — pytest with in-memory SQLite (StaticPool), full coverage of all endpoints
-
-Frontend (frontend/) — ClojureScript + shadow-cljs:
-- re-frame state management, reitit routing
-- Views: home, post, editor (admin), comments, nav
-- Dark cyberpunk/Star Trek CSS theme (public/css/main.css)
-
-To run:
-bash
-# Backend
-cd backend && pip install -r requirements.txt
-cp .env.example .env  # fill in GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, SECRET_KEY
-uvicorn main:app --reload
-
-# Frontend
-cd frontend && npm install
-npx shadow-cljs watch app
-
-*** readme.md
-fill out the file with complete instructions for working with the project.
-The more detailed the better. (how to create new mail, how to create new users.)
-
-
-** backlog
-** done
 * run
 ** Tailwind
 What changed:

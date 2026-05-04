@@ -13,6 +13,10 @@ def _repo() -> Repo:
     return Repo(REPO_PATH)
 
 
+def list_files() -> list[str]:
+    return sorted(p.name for p in DOCS_PATH.glob("*.org") if p.is_file())
+
+
 def read_file(path: str) -> str:
     full = DOCS_PATH / path
     if not full.resolve().is_relative_to(DOCS_PATH):

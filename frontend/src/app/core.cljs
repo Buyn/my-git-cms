@@ -1,5 +1,5 @@
 (ns app.core
-  (:require [reagent.dom :as rdom]
+  (:require [reagent.dom.client :as rdomc]
             [re-frame.core :as rf]
             [reitit.frontend :as rfe]
             [reitit.frontend.easy :as rfee]
@@ -35,10 +35,13 @@
      (when-let [m @match]
        [(get-in m [:data :view]) m])]))
 
+(defonce root (atom nil))
+
 (defn init []
   (rf/dispatch-sync [::s/initialize-db])
   (rfee/start!
    (rfe/router routes)
    (fn [m] (reset! match m))
    {:use-fragment false})
-  (rdom/render [app] (.getElementById js/document "app")))
+  (reset! root (rdomc/create-root (.getElementById js/document "app")))
+  (rdomc/render @root [app]))

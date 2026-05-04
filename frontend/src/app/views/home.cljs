@@ -17,6 +17,6 @@
            [:div.loading "Loading..."]
            [:ul.post-list
             (for [p posts]
-              ^{:key (:path p)}
+              ^{:key p}
               [:li.post-item
-               [:a {:href (str "/post/" (:path p))} (:title p (:path p))]])])]))}))
+               [:a {:href (str "/post/" p)} p]])])]))}))

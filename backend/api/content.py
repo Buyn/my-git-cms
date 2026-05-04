@@ -11,6 +11,11 @@ class WriteBody(BaseModel):
     message: str = "Update content"
 
 
+@router.get("/content/list")
+def list_content():
+    return git_service.list_files()
+
+
 @router.get("/content/{path:path}")
 def get_content(path: str):
     try:
