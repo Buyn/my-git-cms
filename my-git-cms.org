@@ -23,221 +23,259 @@
 * Kanban
 ** urgent 
 ** in progress 
-*** добавить редактирование
-Ты это очень вовремя заметил.
-Сейчас у тебя была дыра — и довольно неприятная.
+*** DONE add profil
+**** Ооо… вот тут ты уже думаешь как архитектор, а не как “соберу формочку и ладно”.
+Но смотри — сейчас у тебя в спеках этого **нет как системы**. Есть только намёк через `/auth/me`.
 
-👉 В текущих спеках:
+И да… в текущем виде у тебя это **недоопределено и потенциально сломается**.
 
-- **редактирование контента админом — есть (частично)**
-- **создание нового поста — не прописано явно**
-- **UI-поведение (клик → редактирование) — вообще не зафиксировано**
+Я тебе сейчас разложу:
 
-А это критично. Потому что в нормальных CMS:
-
-> “edit existing” и “create new” — базовые операции
-> ([Titan CMS][1])
-
-И более того — современные системы часто дают **inline editing прямо на странице**, а не только через отдельный админ-панель ([FavorCMS][2])
+- что правильно ✔
+- что у тебя отсутствует ❌
+- и как это вписать в спеки (конкретно)
 
 ---
 
-## 💔 Где сейчас проблема
+# 🧠 Твоя идея — проверка
 
-У тебя:
+Ты хочешь:
 
-- backend умеет `PUT /content/{path}` ✔
-- frontend имеет editor ✔
+1. редактирование имени
+2. смена email с подтверждением
+3. отображение роли
 
-Но:
-
-❌ нигде не сказано:
-
-- когда показывать editor
-- кто может его открыть
-- как создаётся новый пост
+👉 Это **абсолютно правильно и стандартно**
+(и да, подтверждение email при смене — это не “опция”, это must-have) 
 
 ---
 
-## 🔥 Что мы добавим (и куда)
+# 💣 Проблема сейчас
 
-Я дам тебе **ТОЧЕЧНЫЕ правки**, как ты просил.
-Без переписывания файлов.
+В твоём API:
 
----
-
-# ✏️ 1. `requirements.md`
-
-### ➕ Добавь в `## Core Features → Editing`
-
-```md
-- Admin users must be able to edit existing content pages.
-- Admin users must be able to create new content pages.
+```text
+GET /auth/me
 ```
 
+и всё…
+
+👉 У тебя вообще **нет API для профиля**
+
 ---
 
-### ➕ Добавь новый раздел:
+# 🔪 Что нужно добавить (API)
+
+## 📄 edits для `.kiro/specs/api.md`
+
+Добавь новый раздел:
 
 ```md
-## Admin Content Management
+## Profile
 
-Admin users must have access to content management capabilities directly from the frontend.
+### GET /profile
 
-This includes:
+Returns current user profile.
 
-- Editing existing pages
-- Creating new pages
-- Navigating to edit mode from the content view
-```
-
----
-
-# ✏️ 2. `frontend.md`
-
-### ➕ Добавь новый раздел:
-
-```md
-## Admin Editing Experience
-
-### Edit Existing Content
-
-- If the current user is admin:
-  - Viewing a page must provide an "Edit" action
-  - Edit action switches the page into editor mode
-
-- Editor loads:
-  - raw Org content
-  - preview mode
+Response:
+- id
+- email
+- username
+- role
+- email_verified (boolean)
 
 ---
 
-### Create New Content
+### PUT /profile
 
-- Admin must have access to "New Post" action in UI
+Updates user profile.
 
-Possible locations:
-- Navigation bar
-- Admin panel section
-
----
-
-### Editor Flow
-
-Edit existing:
-1. Open page
-2. Click "Edit"
-3. Modify content
-4. Save → API call
-
-Create new:
-1. Click "New Post"
-2. Enter path/slug
-3. Enter content
-4. Save → API call
-
----
-
-### Permissions
-
-- Only admin can:
-  - Edit content
-  - Create content
-
-- Non-admin users:
-  - Must never see edit controls
-```
-
----
-
-# ✏️ 3. `api.md`
-
-(у тебя уже почти всё есть — добавим ясность)
-
-### ➕ обнови описание:
-
-```md
-### PUT /content/{path}
-
-Creates or updates content.
-
-Behavior:
-- If file exists → update
-- If file does not exist → create new
+Body:
+- username: string (optional)
+- email: string (optional)
 
 Rules:
-- Admin only
-```
-
-👉 Это важный момент
-Ты не добавляешь новый endpoint
-Ты делаешь **PUT = upsert**
+- User can update own profile only
+- Email change requires verification
 
 ---
 
-# ✏️ 4. `backend.md`
+### POST /profile/email/verify
 
-### ➕ Добавь:
+Verifies new email address.
+
+Body:
+- code: string
+
+Rules:
+- Email change is pending until verified
+```
+
+---
+
+# 🧠 Backend логика (в спеки)
+
+## 📄 edits для `.kiro/specs/backend.md`
+
+Добавь:
 
 ```md
-## Content Creation
+## Profile Management
 
-- Creating new content is done via PUT /content/{path}
-- Backend must:
-  - Create file if not exists
-  - Commit change to Git
+Users must be able to:
+
+- Update their display name
+- Request email change
+- View their role
+
+---
+
+## Email Change Flow
+
+1. User submits new email
+2. Backend:
+   - validates uniqueness
+   - generates verification code
+   - stores pending_email
+3. User verifies email
+4. Email is updated
+
+Rules:
+- Old email remains active until verification
+- Unverified email must not replace current one
 ```
 
 ---
 
-## 😏 Что ты только что сделал (осознай)
+# 🎯 Frontend (это важно, не пропусти)
 
-Ты добавил:
+## 📄 edits для `.kiro/specs/frontend.md`
 
-- CRUD (почти полный)
-- admin UX
-- content lifecycle
+Добавь:
 
-И теперь у тебя система уже ведёт себя как нормальный CMS, а не просто “рендерер орг-файлов”.
+```md
+## Profile UI
 
----
-
-## 💡 Маленький, но важный момент
-
-Ты сейчас стоишь перед выбором:
-
-### Вариант A (простой)
-
-- кнопка "Edit"
-- отдельный editor view
-
-### Вариант B (красивый… и опасный 😏)
-
-- inline editing прямо в посте
-- как в Concrete CMS
-
-👉 редактируешь прямо в UI
+User must have access to profile page.
 
 ---
 
-Если хочешь — дальше я:
+## Profile Features
 
-👉 спроектирую тебе **конкретный UI (nav + кнопки + editor overlay)**
-👉 и покажу, как это вписать в твой ClojureScript без боли
+- Display:
+  - username
+  - email (not public)
+  - role (read-only)
 
-Скажи только… насколько ты хочешь, чтобы это было красиво 😌
+- Editable:
+  - username
+  - email (with verification flow)
 
-[1]: https://www.titancms.com/Key-Features?utm_source=chatgpt.com "Key Features"
-[2]: https://favorcms.com/?utm_source=chatgpt.com "FavorCMS — Your site is the editor"
+---
+
+## Email Change UX
+
+- Show "pending email" state
+- Show verification required notice
+- Allow resend verification
+
+---
+
+## Security Rules
+
+- Email must not be publicly exposed
+- Role must be visible but not editable
+```
+
+---
+
+# 💡 UX (вот тут начинается магия)
+
+Если ты сделаешь это тупо:
+
+> “ввел email → сразу поменялся”
+
+— ты облажался.
+
+Правильный UX:
+
+```
+Current email: old@mail.com
+
+New email: new@mail.com
+[Pending verification]
+
+→ Enter code
+→ Confirm
+```
+
+👉 Старый email остаётся активным
+👉 новый не используется, пока не подтверждён ([ethics.ny.gov][1])
+
+---
+
+# 😏 Маленькая деталь, которую ты не учёл
+
+## ❗ роль пользователя
+
+Ты сказал:
+
+> “указание текущей роли пользователя”
+
+Да. Но:
+
+👉 **она не должна редактироваться здесь**
+
+Иначе ты откроешь себе дыру уровня:
+“пользователь → admin за 2 клика”
+
+---
+
+# 💬 Итог
+
+Ты предложил правильное направление.
+Но сейчас это у тебя:
+
+> “идея без контракта”
+
+Я сделал из этого:
+
+- API ✔
+- backend flow ✔
+- frontend UX ✔
+
+---
+
+## 😏 И вот вопрос к тебе
+
+Ты хочешь дальше сделать это **по-настоящему красиво**?
+
+Я могу:
+
+👉 вписать это прямо в твой текущий FastAPI код
+👉 и показать, где у тебя уже сейчас архитектурный косяк с `auth/me`
+
+Скажи… и я начну ломать 😌
+
+[1]: https://ethics.ny.gov/how-verify-your-email-and-recertify-your-profile?utm_source=chatgpt.com "How to complete Email Verification and Recertify an Individual User and Organization Profile"
 
 ** dezine 
+*** DONE Довай проверим как прописан раздель профиля
+пользовате толжен иметь возможност редактировать своё имя в профеле.
+менять емеил. но стребованием его подтверждения
+указание текущей роли пользователя.
 ** todo
-*** помоги понять
-прописали ли мы в спецификациях, что админ при нажатии на пост должен иметь возможность редактировать существуюший пост. И иметь кнопку в своём интерфесе для создания нового поста.
-если нет - довай добавим.
-*** dark starflet
+*** светлы starflet
+выглядит плохо читаемым
 *** green ciber punk
-light ciber punk
+добавить тему
+сделять тему с его зелёным а не феолетовым
+ближе к старым терменал или фолауту
+light ciber punk остаётся тёмным, почти без имеений, нужо чтоб он был ближе к выженой солцем теме, или серым.
+*** синий ciber punk
+добавить тему
+сделать под файловый менеджер фар или волков командер
+светлая больше по голубой
 *** css
 :root[data-theme="default"] {
   --bg-base: #0a0f1a;
@@ -3801,6 +3839,215 @@ Just show me the edits I need to make.
 ***** нужно ли в даной конфигурации рефрейм?
 ***** он точно здесь не избытачен?
 *** DONE добавить телвин
+*** DONE помоги понять
+прописали ли мы в спецификациях, что админ при нажатии на пост должен иметь возможность редактировать существуюший пост. И иметь кнопку в своём интерфесе для создания нового поста.
+если нет - довай добавим.
+*** DONE добавить редактирование
+Ты это очень вовремя заметил.
+Сейчас у тебя была дыра — и довольно неприятная.
+
+👉 В текущих спеках:
+
+- **редактирование контента админом — есть (частично)**
+- **создание нового поста — не прописано явно**
+- **UI-поведение (клик → редактирование) — вообще не зафиксировано**
+
+А это критично. Потому что в нормальных CMS:
+
+> “edit existing” и “create new” — базовые операции
+> ([Titan CMS][1])
+
+И более того — современные системы часто дают **inline editing прямо на странице**, а не только через отдельный админ-панель ([FavorCMS][2])
+
+---
+
+## 💔 Где сейчас проблема
+
+У тебя:
+
+- backend умеет `PUT /content/{path}` ✔
+- frontend имеет editor ✔
+
+Но:
+
+❌ нигде не сказано:
+
+- когда показывать editor
+- кто может его открыть
+- как создаётся новый пост
+
+---
+
+## 🔥 Что мы добавим (и куда)
+
+Я дам тебе **ТОЧЕЧНЫЕ правки**, как ты просил.
+Без переписывания файлов.
+
+---
+
+# ✏️ 1. `requirements.md`
+
+### ➕ Добавь в `## Core Features → Editing`
+
+```md
+- Admin users must be able to edit existing content pages.
+- Admin users must be able to create new content pages.
+```
+
+---
+
+### ➕ Добавь новый раздел:
+
+```md
+## Admin Content Management
+
+Admin users must have access to content management capabilities directly from the frontend.
+
+This includes:
+
+- Editing existing pages
+- Creating new pages
+- Navigating to edit mode from the content view
+```
+
+---
+
+# ✏️ 2. `frontend.md`
+
+### ➕ Добавь новый раздел:
+
+```md
+## Admin Editing Experience
+
+### Edit Existing Content
+
+- If the current user is admin:
+  - Viewing a page must provide an "Edit" action
+  - Edit action switches the page into editor mode
+
+- Editor loads:
+  - raw Org content
+  - preview mode
+
+---
+
+### Create New Content
+
+- Admin must have access to "New Post" action in UI
+
+Possible locations:
+- Navigation bar
+- Admin panel section
+
+---
+
+### Editor Flow
+
+Edit existing:
+1. Open page
+2. Click "Edit"
+3. Modify content
+4. Save → API call
+
+Create new:
+1. Click "New Post"
+2. Enter path/slug
+3. Enter content
+4. Save → API call
+
+---
+
+### Permissions
+
+- Only admin can:
+  - Edit content
+  - Create content
+
+- Non-admin users:
+  - Must never see edit controls
+```
+
+---
+
+# ✏️ 3. `api.md`
+
+(у тебя уже почти всё есть — добавим ясность)
+
+### ➕ обнови описание:
+
+```md
+### PUT /content/{path}
+
+Creates or updates content.
+
+Behavior:
+- If file exists → update
+- If file does not exist → create new
+
+Rules:
+- Admin only
+```
+
+👉 Это важный момент
+Ты не добавляешь новый endpoint
+Ты делаешь **PUT = upsert**
+
+---
+
+# ✏️ 4. `backend.md`
+
+### ➕ Добавь:
+
+```md
+## Content Creation
+
+- Creating new content is done via PUT /content/{path}
+- Backend must:
+  - Create file if not exists
+  - Commit change to Git
+```
+
+---
+
+## 😏 Что ты только что сделал (осознай)
+
+Ты добавил:
+
+- CRUD (почти полный)
+- admin UX
+- content lifecycle
+
+И теперь у тебя система уже ведёт себя как нормальный CMS, а не просто “рендерер орг-файлов”.
+
+---
+
+## 💡 Маленький, но важный момент
+
+Ты сейчас стоишь перед выбором:
+
+### Вариант A (простой)
+
+- кнопка "Edit"
+- отдельный editor view
+
+### Вариант B (красивый… и опасный 😏)
+
+- inline editing прямо в посте
+- как в Concrete CMS
+
+👉 редактируешь прямо в UI
+
+---
+
+Если хочешь — дальше я:
+
+👉 спроектирую тебе **конкретный UI (nav + кнопки + editor overlay)**
+👉 и покажу, как это вписать в твой ClojureScript без боли
+
+Скажи только… насколько ты хочешь, чтобы это было красиво 😌
+
+[1]: https://www.titancms.com/Key-Features?utm_source=chatgpt.com "Key Features"
+[2]: https://favorcms.com/?utm_source=chatgpt.com "FavorCMS — Your site is the editor"
 * run
 ** # Backend
 cd /home/buyn/Dev/AI/kiro-proj/my-git-cms/backend; source .venv/bin/activate 
@@ -4154,6 +4401,10 @@ CI/CD ненужен
 *** перед тем как писать файлы задай мне вопросы чтоб понять задачу.
 
 ** промтс promts
+*** I changed specs files
+let's make changes in accordance with the new specs files.
+and If you see errors and inconsistencies in the specs files, correct them.
+
 *** I changed frontend
 let's make changes in accordance with the new requirements.
 design.md frontend.md api.md agent.md ui-theme.md requirements.md
@@ -4191,9 +4442,12 @@ Follow the best functional code standards for clojour and clojour script.
 всегда отвечай на английском
 *** всегда отвечай на английском
 ** readme.md
+*** let's update readme
+all the changes that have been added.
+Let's write down how to determine who has the admin role.
+*** readme.md
 fill out the file with complete instructions for working with the project.
 The more detailed the better. (how to create new mail, how to create new users.)
-
 ** спекс
 *** раскажи мне о состоянии проекта
  tell me about the status of the project
@@ -4524,6 +4778,34 @@ backend.md        ← КАК РАБОТАЕТ СЕРВЕР
 frontend.md       ← КАК ВЕДЁТ СЕБЯ КЛИЕНТ
 
 agent.md          ← ПРАВИЛА РАЗРАБОТКИ
+*** ### Becoming an Admin
+
+There is no admin UI for role management. The first admin must be promoted directly in the database.
+
+**Step 1 — log in via GitHub** so your user record is created automatically.
+
+**Step 2 — promote yourself:**
+
+```bash
+cd backend
+sqlite3 cms.db
+```
+
+```sql
+-- Find your username
+SELECT id, username, email, role FROM users;
+
+-- Promote to admin
+UPDATE users SET role = 'admin' WHERE username = 'your-github-username';
+
+-- Verify
+SELECT id, username, role FROM users;
+
+.quit
+```
+
+After the next page load the frontend will reflect your admin role (the session is re-read on every app init via `GET /auth/me`).
+
 ** aider
 (find-file-other-frame "~/Dropbox/orgs/Org-roam/default/tech.cyber.ai.tools.aider_aider.org")
 ** kiro

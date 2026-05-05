@@ -56,7 +56,7 @@ Creates a comment.
 Body:
 - content: string
 - page_path: string
-- email: string (required for anonymous)
+- anon_email: string (required for anonymous)
 
 ---
 
@@ -84,6 +84,48 @@ Adds a reaction.
 
 Body:
 - type: string
+
+---
+
+## Profile
+
+### GET /profile
+
+Returns current user profile.
+
+Response:
+- id
+- email
+- username
+- role
+- email_verified (boolean)
+
+---
+
+### PUT /profile
+
+Updates user profile.
+
+Body:
+- username: string (optional)
+- email: string (optional)
+
+Rules:
+- User can update own profile only
+- Email change requires verification
+
+---
+
+### POST /profile/email/verify
+
+Verifies new email address.
+
+Body:
+- code: string
+
+Rules:
+- Email change is pending until verified
+```
 
 ---
 

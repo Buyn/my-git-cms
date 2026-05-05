@@ -17,6 +17,11 @@
       [:a {:href (rfee/href :app.core/home) :class "text-primary hover:text-accent"} "Home"]
       (if user
         [:<>
+         (when (= (:role user) "admin")
+           [:a {:href  (rfee/href :app.core/new-post)
+                :class "border border-accent text-accent px-3 py-1 rounded-sm
+                        hover:bg-[var(--accent-dim)] transition-colors"}
+            "+ New Post"])
          [:span {:class "text-muted text-xs"} (:username user)]
          [:a {:href  (rfee/href :app.core/profile)
               :class "text-primary hover:text-accent"} "Profile"]
@@ -28,7 +33,6 @@
              :class "border border-accent text-accent px-3 py-1 rounded-sm
                     hover:bg-[var(--accent-dim)] transition-colors"}
          "Login"])
-      ;; Theme controls
       [:select {:value     theme
                 :on-change #(rf/dispatch [::s/set-theme (.. % -target -value)])
                 :class     "bg-raised border border-DEFAULT text-primary text-xs

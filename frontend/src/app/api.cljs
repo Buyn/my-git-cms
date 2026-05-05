@@ -90,6 +90,14 @@
                           :on-success #(rf/dispatch [::load-comments page-path])
                           :on-error   #(rf/dispatch [::s/set-error %])}]]}))
 
+(rf/reg-event-fx ::edit-comment
+  (fn [_ [_ id content page-path]]
+    {:fx [[:effect/fetch {:method     "PUT"
+                          :path       (str "/comments/" id)
+                          :body       {:content content}
+                          :on-success #(rf/dispatch [::load-comments page-path])
+                          :on-error   #(rf/dispatch [::s/set-error %])}]]}))
+
 (rf/reg-event-fx ::add-reaction
   (fn [_ [_ comment-id type]]
     {:fx [[:effect/fetch {:method   "POST"

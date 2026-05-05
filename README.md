@@ -17,6 +17,7 @@ Git is the single source of truth for content (Org-mode files). Comments live in
 - [User Management](#user-management)
 - [Content Management](#content-management)
 - [Comments](#comments)
+- [Theming](#theming)
 - [Media](#media)
 - [Testing](#testing)
 - [Deployment (PythonAnywhere)](#deployment-pythonanywhere)
@@ -34,7 +35,7 @@ FastAPI (backend/main.py)
 Git repo (Docs/*.org)   +   SQLite (cms.db)
 ```
 
-- **Frontend** — re-frame + reitit, served from `frontend/public/`
+- **Frontend** — re-frame + reitit + TailwindCSS, served from `frontend/public/`
 - **Backend** — FastAPI, thin transport layer, no business logic in routes
 - **Content** — `.org` files in `Docs/`, every save is a Git commit
 - **Database** — SQLite for users, comments, reactions
@@ -113,7 +114,7 @@ cd frontend
 npm install
 ```
 
-This installs `shadow-cljs`. ClojureScript dependencies (reagent, re-frame, reitit) are downloaded by shadow-cljs on first build.
+This installs `shadow-cljs` and `tailwindcss`. ClojureScript dependencies (reagent, re-frame, reitit) are downloaded by shadow-cljs on first build.
 
 ---
 
@@ -126,11 +127,18 @@ cd backend
 uvicorn main:app --reload --port 8000
 ```
 
-**Terminal 2 — frontend dev server:**
+**Terminal 2 — frontend JS:**
 
 ```bash
 cd frontend
 npx shadow-cljs watch app
+```
+
+**Terminal 3 — frontend CSS (Tailwind watch):**
+
+```bash
+cd frontend
+npm run css:watch
 ```
 
 Open `http://localhost:8080` in your browser.
@@ -140,10 +148,11 @@ To build the frontend for production:
 
 ```bash
 cd frontend
+npm run css:build
 npx shadow-cljs release app
 ```
 
-Output goes to `frontend/public/js/app.js`.
+Output goes to `frontend/public/js/app.js` and `frontend/public/css/main.css`.
 
 ---
 
@@ -179,7 +188,7 @@ For production, update the callback URL to your real domain, e.g.:
 
 ### Logout
 
-The frontend dispatches `::logout` which clears the session cookie via `POST /auth/logout` (or simply deletes the cookie client-side).
+The frontend calls `POST /auth/logout`, which clears the session cookie server-side.
 
 ---
 
@@ -187,16 +196,20 @@ The frontend dispatches `::logout` which clears the session cookie via `POST /au
 
 ### User Roles
 
-| Role    | Description                                                                                       |
-|---------|---------------------------------------------------------------------------------------------------|
-| `user`  | Default for anyone who logs in via GitHub. Verified email. Can comment, edit own comments, react. |
-| `admin` | Full access. Can create/edit content, moderate comments, manage users.                            |
+| Role    | Description                                                                                         |
+|---------|-----------------------------------------------------------------------------------------------------|
+| `user`  | Default for anyone who logs in via GitHub. Can comment, edit own comments, react.                   |
+| `admin` | Full access. Can create/edit content, moderate comments, manage users. Sees admin UI controls.      |
 
 There is no `anon` role in the database — anonymous commenters are identified only by the email they provide when posting a comment.
 
-### Promoting a User to Admin
+### Becoming an Admin
 
-There is no admin UI yet. Promote via the SQLite database directly:
+There is no admin UI for role management. The first admin must be promoted directly in the database.
+
+**Step 1 — log in via GitHub** so your user record is created automatically.
+
+**Step 2 — promote yourself:**
 
 ```bash
 cd backend
@@ -204,10 +217,10 @@ sqlite3 cms.db
 ```
 
 ```sql
--- List all users
+-- Find your username
 SELECT id, username, email, role FROM users;
 
--- Promote a user to admin
+-- Promote to admin
 UPDATE users SET role = 'admin' WHERE username = 'your-github-username';
 
 -- Verify
@@ -216,9 +229,29 @@ SELECT id, username, role FROM users;
 .quit
 ```
 
-### Creating a User Manually (without GitHub login)
+After the next page load the frontend will reflect your admin role (the session is re-read on every app init via `GET /auth/me`).
 
-Users are normally created automatically on first GitHub login. To create one manually (e.g. for testing):
+### Promoting Additional Admins
+
+Same process — log in once to create the record, then promote via SQLite:
+
+```bash
+sqlite3 backend/cms.db "UPDATE users SET role = 'admin' WHERE username = 'other-username';"
+```
+
+### Viewing All Users
+
+```bash
+sqlite3 backend/cms.db "SELECT id, username, email, role, verified, created_at FROM users;"
+```
+
+### Deleting a User
+
+```bash
+sqlite3 backend/cms.db "DELETE FROM users WHERE username = 'someuser';"
+```
+
+### Creating a User Manually (without GitHub login)
 
 ```bash
 cd backend
@@ -244,18 +277,6 @@ db.close()
 EOF
 ```
 
-### Viewing All Users
-
-```bash
-sqlite3 backend/cms.db "SELECT id, username, email, role, verified, created_at FROM users;"
-```
-
-### Deleting a User
-
-```bash
-sqlite3 backend/cms.db "DELETE FROM users WHERE username = 'someuser';"
-```
-
 ---
 
 ## Content Management
@@ -269,17 +290,16 @@ sqlite3 backend/cms.db "DELETE FROM users WHERE username = 'someuser';"
 
 ### Adding a New Post
 
-**Option 1 — via the editor UI (admin only):**
+**Option 1 — via the UI (admin only):**
 
 1. Log in as admin
-2. Navigate to `/edit/my-new-post.org`
-3. Write Org content, click **Save**
-4. The backend writes the file and commits it to Git
+2. Click **+ New Post** in the nav bar
+3. Enter a filename (e.g. `my-new-post.org`), write content, set a commit message
+4. Click **Create** — the backend writes the file and commits it to Git
 
 **Option 2 — directly via Git:**
 
 ```bash
-# Create the file
 cat > Docs/my-new-post.org <<'EOF'
 * My New Post
 
@@ -292,7 +312,23 @@ EOF
 
 git add Docs/my-new-post.org
 git commit -m "Add my-new-post"
-git push
+```
+
+### Editing a Post
+
+**Via the UI (admin only):**
+
+1. Open any post
+2. Click **Edit** — the page switches into inline editor mode
+3. Edit the raw Org text; toggle **Preview** to see rendered output
+4. Enter a commit message and click **Save**
+
+**Via Git directly:**
+
+```bash
+vim Docs/my-post.org
+git add Docs/my-post.org
+git commit -m "Update my-post"
 ```
 
 ### Org File Format
@@ -310,16 +346,6 @@ External link: [[https://example.com][Example]]
 
 #+CAPTION: Alt text
 [[file:../media/image.png]]
-```
-
-### Editing a Post
-
-Via the editor UI at `/edit/<filename>.org`, or directly edit the file and commit:
-
-```bash
-vim Docs/my-post.org
-git add Docs/my-post.org
-git commit -m "Update my-post"
 ```
 
 ---
@@ -344,7 +370,7 @@ Logged-in users comment without providing an email (session cookie is used autom
 
 ### Editing a Comment
 
-Only the comment's author can edit it. Via the UI, or:
+Only the comment's author can edit it. Click **Edit** on the comment in the UI, or via API:
 
 ```bash
 curl -X PUT http://localhost:8000/comments/42 \
@@ -355,7 +381,7 @@ curl -X PUT http://localhost:8000/comments/42 \
 
 ### Deleting a Comment
 
-Owner or admin can delete. Admins can delete any comment via the UI or:
+Owner or admin can delete via the UI (× button), or:
 
 ```bash
 curl -X DELETE http://localhost:8000/comments/42 \
@@ -375,6 +401,28 @@ curl -X POST http://localhost:8000/comments/42/reaction \
 
 ---
 
+## Theming
+
+The frontend supports three themes, each with light and dark modes:
+
+| Theme       | Character                          |
+|-------------|------------------------------------|
+| `starfleet` | Clean, soft blue accents (default) |
+| `cyberpunk` | Dark-first, neon pink accents      |
+| `minimal`   | Near-monochrome, typography-first  |
+
+The theme dropdown and light/dark toggle are in the nav bar. Selection is persisted in `localStorage` and applied before the first render (no flash).
+
+Themes are implemented via CSS variables on the `<html>` element:
+
+```html
+<html class="theme-cyberpunk dark">
+```
+
+All component styles use semantic tokens (`text-accent`, `bg-surface`, `border-DEFAULT`, etc.) — never raw colors.
+
+---
+
 ## Media
 
 Place media files in the `media/` directory at the project root:
@@ -390,7 +438,7 @@ Reference in Org files:
 [[file:../media/my-image.png]]
 ```
 
-The backend serves `media/` as static files at `/media/`. In production, you can serve this directory directly via nginx or PythonAnywhere's static file mapping.
+The backend serves `media/` as static files at `/media/`.
 
 ---
 
@@ -401,13 +449,7 @@ cd backend
 pytest tests/ -v
 ```
 
-All 16 tests should pass. Tests use an in-memory SQLite database and do not touch the real `cms.db` or `Docs/`.
-
-To run a specific test file:
-
-```bash
-pytest tests/test_comments.py -v
-```
+All tests use an in-memory SQLite database and do not touch the real `cms.db` or `Docs/`.
 
 ---
 
@@ -419,11 +461,7 @@ pytest tests/test_comments.py -v
 git clone https://github.com/Buyn/my-git-cms.git
 ```
 
-Or upload via the PythonAnywhere Files tab.
-
 ### 2. Install dependencies
-
-In a PythonAnywhere Bash console:
 
 ```bash
 cd my-git-cms/backend
@@ -431,9 +469,6 @@ pip install --user -r requirements.txt
 ```
 
 ### 3. Configure the WSGI file
-
-In the PythonAnywhere **Web** tab, set the WSGI file to point to the FastAPI app.
-Edit the auto-generated WSGI file:
 
 ```python
 import sys
@@ -444,8 +479,7 @@ from main import app as application
 
 ### 4. Set environment variables
 
-PythonAnywhere does not load `.env` files automatically in WSGI mode.
-Either hardcode values in the WSGI file or set them via the **Web → Environment variables** section:
+In **Web → Environment variables**:
 
 ```
 SECRET_KEY=your-secret
@@ -458,8 +492,6 @@ DATABASE_URL=sqlite:////home/yourusername/my-git-cms/backend/cms.db
 
 ### 5. Static files
 
-In the PythonAnywhere **Web → Static files** section, add:
-
 | URL       | Directory                                       |
 |-----------|-------------------------------------------------|
 | `/media/` | `/home/yourusername/my-git-cms/media`           |
@@ -470,15 +502,13 @@ In the PythonAnywhere **Web → Static files** section, add:
 ```bash
 cd my-git-cms/frontend
 npm install
+npm run css:build
 npx shadow-cljs release app
 ```
 
 ### 7. Update the GitHub OAuth callback URL
 
-In your GitHub OAuth App settings, update the callback URL to:
-`https://yourusername.pythonanywhere.com/auth/callback`
-
-And update `CORS` in `backend/main.py` to allow your domain:
+Set callback to `https://yourusername.pythonanywhere.com/auth/callback` and update CORS in `backend/main.py`:
 
 ```python
 allow_origins=["https://yourusername.pythonanywhere.com"],
@@ -494,28 +524,30 @@ Click **Reload** in the PythonAnywhere Web tab.
 
 ### Content
 
-| Method | Path              | Auth  | Description                                         |
-|--------|-------------------|-------|-----------------------------------------------------|
-| GET    | `/content/{path}` | —     | Read an Org file. Returns `{raw, html}`             |
-| PUT    | `/content/{path}` | admin | Write file + Git commit. Body: `{content, message}` |
+| Method | Path                | Auth  | Description                                          |
+|--------|---------------------|-------|------------------------------------------------------|
+| GET    | `/content/list`     | —     | List all post filenames                              |
+| GET    | `/content/{path}`   | —     | Read an Org file. Returns `{raw, html}`              |
+| PUT    | `/content/{path}`   | admin | Write file + Git commit. Body: `{content, message}`  |
 
 ### Comments
 
-| Method | Path                      | Auth        | Description                                               |
-|--------|---------------------------|-------------|-----------------------------------------------------------|
-| GET    | `/comments/{page_path}`   | —           | List comments for a page                                  |
-| POST   | `/comments`               | —           | Create comment. Body: `{page_path, content, anon_email?}` |
-| PUT    | `/comments/{id}`          | owner       | Edit comment. Body: `{content}`                           |
-| DELETE | `/comments/{id}`          | owner/admin | Delete comment                                            |
-| POST   | `/comments/{id}/reaction` | user        | Add/update reaction. Body: `{type}`                       |
+| Method | Path                      | Auth        | Description                                                  |
+|--------|---------------------------|-------------|--------------------------------------------------------------|
+| GET    | `/comments/{page_path}`   | —           | List comments for a page                                     |
+| POST   | `/comments`               | —           | Create comment. Body: `{page_path, content, anon_email?}`    |
+| PUT    | `/comments/{id}`          | owner       | Edit comment. Body: `{content}`                              |
+| DELETE | `/comments/{id}`          | owner/admin | Delete comment                                               |
+| POST   | `/comments/{id}/reaction` | user        | Add/update reaction. Body: `{type}`                          |
 
 ### Auth
 
-| Method | Path             | Description                         |
-|--------|------------------|-------------------------------------|
-| GET    | `/auth/login`    | Redirect to GitHub OAuth            |
-| GET    | `/auth/callback` | OAuth callback, sets session cookie |
-| GET    | `/auth/me`       | Current user info                   |
+| Method | Path               | Description                              |
+|--------|--------------------|------------------------------------------|
+| GET    | `/auth/login`      | Redirect to GitHub OAuth                 |
+| GET    | `/auth/callback`   | OAuth callback, sets session cookie      |
+| GET    | `/auth/me`         | Current user `{id, username, email, role, verified}` |
+| POST   | `/auth/logout`     | Clear session cookie                     |
 
 ### Media
 

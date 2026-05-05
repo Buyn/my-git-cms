@@ -12,7 +12,7 @@
   (let [text  (r/atom "")
         email (r/atom "")]
     (fn []
-      [:form {:class    "flex flex-col gap-2 mb-6"
+      [:form {:class     "flex flex-col gap-2 mb-6"
               :on-submit (fn [e]
                            (.preventDefault e)
                            (when (seq @text)
@@ -42,6 +42,45 @@
                           hover:border-accent transition-colors cursor-pointer"}
       emoji])])
 
+(defn comment-card [c page-path user]
+  (let [editing? (r/atom false)
+        draft    (r/atom (:content c))]
+    (fn [c page-path user]
+      (let [owner? (= (:id user) (:user_id c))
+            admin? (= (:role user) "admin")]
+        [:div {:class "bg-surface border border-DEFAULT rounded-sm px-4 py-3"}
+         [:div {:class "flex items-center gap-3 mb-1 text-xs"}
+          [:span {:class "text-accent"}
+           (or (:username c) (:anon_email c) "anonymous")]
+          [:span {:class "text-muted flex-1"} (:created_at c)]
+          (when owner?
+            [:button {:on-click #(reset! editing? true)
+                      :class    "border border-DEFAULT text-muted px-2 py-0.5 rounded-sm
+                                 hover:border-accent hover:text-accent transition-colors"}
+             "Edit"])
+          (when (or admin? owner?)
+            [:button {:on-click #(rf/dispatch [::api/delete-comment (:id c) page-path])
+                      :class    "border border-danger text-danger px-2 py-0.5 rounded-sm
+                                 hover:bg-[rgba(255,51,102,0.1)] transition-colors"}
+             "×"])]
+         (if @editing?
+           [:div {:class "flex flex-col gap-2 mt-1"}
+            [:textarea {:value     @draft
+                        :on-change #(reset! draft (.. % -target -value))
+                        :class     (str input-cls " min-h-[60px] resize-y")}]
+            [:div {:class "flex gap-2"}
+             [:button {:on-click #(do (rf/dispatch [::api/edit-comment (:id c) @draft page-path])
+                                      (reset! editing? false))
+                       :class    "border border-accent text-accent px-3 py-1 rounded-sm text-xs
+                                  hover:bg-[var(--accent-dim)] transition-colors"}
+              "Save"]
+             [:button {:on-click #(do (reset! draft (:content c)) (reset! editing? false))
+                       :class    "border border-DEFAULT text-muted px-3 py-1 rounded-sm text-xs
+                                  hover:border-accent hover:text-accent transition-colors"}
+              "Cancel"]]]
+           [:p {:class "text-primary text-sm"} (:content c)])
+         [reaction-bar (:id c)]]))))
+
 (defn comments-section [page-path]
   (r/create-class
    {:component-did-mount #(rf/dispatch [::api/load-comments page-path])
@@ -56,16 +95,4 @@
          [:div {:class "flex flex-col gap-3"}
           (for [c comments]
             ^{:key (:id c)}
-            [:div {:class "bg-surface border border-DEFAULT rounded-sm px-4 py-3"}
-             [:div {:class "flex items-center gap-3 mb-1 text-xs"}
-              [:span {:class "text-accent"}
-               (or (:username c) (:anon_email c) "anonymous")]
-              [:span {:class "text-muted flex-1"} (:created_at c)]
-              (when (or (= (:role user) "admin")
-                        (= (:id user) (:user_id c)))
-                [:button {:on-click #(rf/dispatch [::api/delete-comment (:id c) page-path])
-                          :class    "border border-danger text-danger px-2 py-0.5 rounded-sm
-                                     hover:bg-[rgba(255,51,102,0.1)] transition-colors"}
-                 "×"])]
-             [:p {:class "text-primary text-sm"} (:content c)]
-             [reaction-bar (:id c)]])]]))}))
+            [comment-card c page-path user])]]))}))

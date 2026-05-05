@@ -224,7 +224,6 @@ Create new:
 
 - Non-admin users:
   - Must never see edit controls
-```
 
 ---
 
@@ -233,6 +232,39 @@ Create new:
 - Display comments per page
 - Allow creation/edit/delete
 - Support reactions
+
+---
+## Profile UI
+
+User must have access to profile page.
+
+---
+
+### Profile Features
+
+- Display:
+  - username
+  - email (not public)
+  - role (read-only)
+
+- Editable:
+  - username
+  - email (with verification flow)
+
+---
+
+### Email Change UX
+
+- Show "pending email" state
+- Show verification required notice
+- Allow resend verification
+
+---
+
+### Security Rules
+
+- Email must not be publicly exposed
+- Role must be visible but not editable
 
 ---
 ## Design Rules
@@ -245,3 +277,4 @@ Create new:
 - No duplicated styles
 
 ---
+

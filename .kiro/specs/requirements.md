@@ -53,7 +53,6 @@ This includes:
 - Editing existing pages
 - Creating new pages
 - Navigating to edit mode from the content view
-```
 
 ---
 ## User Roles

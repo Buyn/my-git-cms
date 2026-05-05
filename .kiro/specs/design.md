@@ -104,6 +104,5 @@ Backend:
 - Authentication
 - Git interaction
 - Comment persistence
-```
 
 ---

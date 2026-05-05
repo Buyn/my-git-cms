@@ -9,7 +9,8 @@
             [app.views.nav :refer [nav]]
             [app.views.home :refer [home]]
             [app.views.post :refer [post]]
-            [app.views.editor :refer [editor]]))
+            [app.views.editor :refer [editor]]
+            [app.views.new-post :refer [new-post]]))
 
 (defn profile [_]
   (let [user @(rf/subscribe [::s/user])]
@@ -26,7 +27,8 @@
 (def routes
   [["/"           {:name ::home    :view home}]
    ["/post/:path" {:name ::post    :view post}]
-   ["/edit/:path" {:name ::editor  :view editor}]
+   ["/edit/:path" {:name ::editor   :view editor}]
+   ["/new"        {:name ::new-post :view new-post}]
    ["/profile"    {:name ::profile :view profile}]])
 
 (defonce match (r/atom nil))

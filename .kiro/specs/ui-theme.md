@@ -99,6 +99,5 @@ No accent color emphasis
 - Stored in localStorage
 - Applied before app init
 - No flicker allowed
-```
 
 ---

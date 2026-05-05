@@ -53,6 +53,33 @@ Tables:
 
 ---
 
+## Profile Management
+
+Users must be able to:
+
+- Update their display name
+- Request email change
+- View their role
+
+---
+
+## Email Change Flow
+
+1. User submits new email
+2. Backend:
+   - validates uniqueness
+   - generates verification code
+   - stores pending_email
+3. User verifies email
+4. Email is updated
+
+Rules:
+- Old email remains active until verification
+- Unverified email must not replace current one
+```
+
+---
+
 ## Content Creation
 
 - Creating new content is done via PUT /content/{path}
