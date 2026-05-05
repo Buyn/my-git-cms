@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Theme tokens ─────────────────────────────────────────── */
+
+:root,
+.theme-starfleet {
+  --bg-base:      #f5f7fa;
+  --bg-surface:   #eef1f6;
+  --bg-elevated:  #e6eaf2;
+  --text-primary: #0b1a2b;
+  --text-muted:   #4a6080;
+  --accent:       #5ab4ff;
+  --accent-dim:   rgba(90, 180, 255, 0.15);
+  --border:       rgba(90, 180, 255, 0.3);
+  --danger:       #d93025;
+  --glow:         none;
+}
+
+.theme-starfleet.dark {
+  --bg-base:      #0b1220;
+  --bg-surface:   #0f1929;
+  --bg-elevated:  #132035;
+  --text-primary: #d6e6ff;
+  --text-muted:   #6a8aaa;
+  --accent:       #7fd1ff;
+  --accent-dim:   rgba(127, 209, 255, 0.12);
+  --border:       rgba(127, 209, 255, 0.2);
+  --danger:       #ff5555;
+  --glow:         0 0 6px rgba(127, 209, 255, 0.3);
+}
+
+.theme-cyberpunk {
+  --bg-base:      #0f0f12;
+  --bg-surface:   #141418;
+  --bg-elevated:  #1a1a20;
+  --text-primary: #e6e6e6;
+  --text-muted:   #888899;
+  --accent:       #ff2bd6;
+  --accent-dim:   rgba(255, 43, 214, 0.12);
+  --border:       rgba(255, 43, 214, 0.25);
+  --danger:       #ff3366;
+  --glow:         0 0 6px rgba(255, 43, 214, 0.35);
+}
+
+.theme-cyberpunk.dark {
+  --bg-base:      #070709;
+  --bg-surface:   #0c0c10;
+  --bg-elevated:  #111116;
+  --text-primary: #ffffff;
+  --text-muted:   #7777aa;
+  --accent:       #ff2bd6;
+  --accent-dim:   rgba(255, 43, 214, 0.1);
+  --border:       rgba(255, 43, 214, 0.2);
+  --danger:       #ff3366;
+  --glow:         0 0 8px rgba(255, 43, 214, 0.4);
+}
+
+.theme-minimal {
+  --bg-base:      #ffffff;
+  --bg-surface:   #f8f8f8;
+  --bg-elevated:  #f0f0f0;
+  --text-primary: #111111;
+  --text-muted:   #666666;
+  --accent:       #333333;
+  --accent-dim:   rgba(0, 0, 0, 0.06);
+  --border:       #dddddd;
+  --danger:       #cc0000;
+  --glow:         none;
+}
+
+.theme-minimal.dark {
+  --bg-base:      #111111;
+  --bg-surface:   #1a1a1a;
+  --bg-elevated:  #222222;
+  --text-primary: #eeeeee;
+  --text-muted:   #888888;
+  --accent:       #cccccc;
+  --accent-dim:   rgba(255, 255, 255, 0.06);
+  --border:       #333333;
+  --danger:       #ff4444;
+  --glow:         none;
+}
+
+/* ── Base ─────────────────────────────────────────────────── */
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+a { color: var(--accent); }
+
+/* ── Prose content (rendered Org HTML) ───────────────────── */
+
+.prose h1, .prose h2, .prose h3 { color: var(--accent); margin: 1.5rem 0 0.5rem; }
+.prose p   { margin-bottom: 1rem; }
+.prose code {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 0.1em 0.4em;
+  border-radius: 2px;
+}
+.prose pre {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 1rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}

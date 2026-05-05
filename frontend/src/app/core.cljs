@@ -13,14 +13,15 @@
 
 (defn profile [_]
   (let [user @(rf/subscribe [::s/user])]
-    [:div.page
-     [:h1.page-title "Profile"]
+    [:div {:class "max-w-3xl mx-auto px-6 py-8"}
+     [:h1 {:class "text-xl font-bold text-accent mb-6 border-b border-DEFAULT pb-2"}
+      "Profile"]
      (if user
-       [:div
-        [:p [:strong "Username: "] (:username user)]
-        [:p [:strong "Email: "]    (:email user)]
-        [:p [:strong "Role: "]     (:role user)]]
-       [:p "Not logged in."])]))
+       [:div {:class "flex flex-col gap-2 text-sm"}
+        [:p [:span {:class "text-muted"} "Username: "] (:username user)]
+        [:p [:span {:class "text-muted"} "Email: "]    (:email user)]
+        [:p [:span {:class "text-muted"} "Role: "]     (:role user)]]
+       [:p {:class "text-muted"} "Not logged in."])]))
 
 (def routes
   [["/"           {:name ::home    :view home}]
@@ -32,9 +33,12 @@
 
 (defn app []
   (let [error @(rf/subscribe [::s/error])]
-    [:div.app
+    [:div {:class "min-h-screen bg-base text-primary font-mono"}
      [nav]
-     (when error [:div.error-banner error])
+     (when error
+       [:div {:class "bg-[rgba(255,51,102,0.08)] border-b border-danger
+                      text-danger text-sm text-center px-8 py-2"}
+        error])
      (when-let [m @match]
        [(get-in m [:data :view]) m])]))
 

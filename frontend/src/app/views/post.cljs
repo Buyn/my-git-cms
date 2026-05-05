@@ -11,16 +11,19 @@
      {:component-did-mount #(rf/dispatch [::api/load-post path])
       :reagent-render
       (fn []
-        (let [post @(rf/subscribe [::s/current-post])
-              user @(rf/subscribe [::s/user])
+        (let [post    @(rf/subscribe [::s/current-post])
+              user    @(rf/subscribe [::s/user])
               loading @(rf/subscribe [::s/loading])]
-          [:div.page
+          [:div {:class "max-w-3xl mx-auto px-6 py-8"}
            (if loading
-             [:div.loading "Loading..."]
+             [:p {:class "text-muted text-center py-8"} "Loading..."]
              (when post
                [:<>
                 (when (= (:role user) "admin")
-                  [:a.btn-secondary {:href (str "/edit/" path)} "Edit"])
-                [:article.post-content
-                 {:dangerouslySetInnerHTML {:__html (:html post)}}]
+                  [:a {:href  (str "/edit/" path)
+                       :class "inline-block mb-4 border border-muted text-muted px-3 py-1
+                                rounded-sm hover:border-accent hover:text-accent transition-colors text-sm"}
+                   "Edit"])
+                [:article {:class "prose bg-surface border border-DEFAULT rounded-sm p-8 mb-8"
+                           :dangerouslySetInnerHTML {:__html (:html post)}}]
                 [comments-section path]]))]))})))

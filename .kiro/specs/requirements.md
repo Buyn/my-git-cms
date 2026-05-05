@@ -33,6 +33,8 @@ The system must support content stored as Org-mode files, with relative linking 
 
 - Frontend provides editing capabilities.
 - Changes are committed directly to Git.
+- Admin users must be able to edit existing content pages.
+- Admin users must be able to create new content pages.
 
 ### Git Integration
 

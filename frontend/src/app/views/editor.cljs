@@ -18,25 +18,34 @@
           (when (and post (nil? @content))
             (reset! content (:raw post)))
           (if (not= (:role user) "admin")
-            [:div.page [:p.error "Access denied."]]
-            [:div.page
-             [:div.editor-toolbar
-              [:span.editor-path path]
-              [:button.btn-ghost {:on-click #(swap! preview? not)}
+            [:div {:class "max-w-3xl mx-auto px-6 py-8"}
+             [:p {:class "text-danger"} "Access denied."]]
+            [:div {:class "max-w-3xl mx-auto px-6 py-8"}
+             ;; Toolbar
+             [:div {:class "flex items-center gap-3 mb-4 pb-3 border-b border-DEFAULT"}
+              [:span {:class "text-muted flex-1 text-sm"} path]
+              [:button {:on-click #(swap! preview? not)
+                        :class    "border border-DEFAULT text-muted px-3 py-1 rounded-sm text-sm
+                                   hover:border-accent hover:text-accent transition-colors"}
                (if @preview? "Edit" "Preview")]
-              [:button.btn-primary
-               {:on-click #(rf/dispatch [::api/save-post path @content @message])}
+              [:button {:on-click #(rf/dispatch [::api/save-post path @content @message])
+                        :class    "border border-accent text-accent px-3 py-1 rounded-sm text-sm
+                                   hover:bg-[var(--accent-dim)] transition-colors"}
                "Save"]]
              (if @preview?
-               [:div.post-content
-                {:dangerouslySetInnerHTML {:__html (:html post)}}]
+               [:article {:class "prose bg-surface border border-DEFAULT rounded-sm p-8"
+                          :dangerouslySetInnerHTML {:__html (:html post)}}]
                [:<>
-                [:textarea.editor-area
-                 {:value     (or @content "")
-                  :on-change #(reset! content (.. % -target -value))}]
-                [:input.comment-form
-                 {:type        "text"
-                  :placeholder "Commit message"
-                  :value       @message
-                  :on-change   #(reset! message (.. % -target -value))
-                  :style       {:margin-top "0.5rem"}}]])])))})))
+                [:textarea {:value     (or @content "")
+                            :on-change #(reset! content (.. % -target -value))
+                            :class     "w-full min-h-[60vh] bg-surface border border-DEFAULT
+                                        rounded-sm text-primary font-mono text-sm p-4
+                                        resize-y outline-none focus:border-accent
+                                        focus:shadow-glow transition-colors"}]
+                [:input {:type        "text"
+                         :placeholder "Commit message"
+                         :value       @message
+                         :on-change   #(reset! message (.. % -target -value))
+                         :class       "mt-2 w-full bg-surface border border-DEFAULT rounded-sm
+                                       text-primary font-mono text-sm px-3 py-2 outline-none
+                                       focus:border-accent transition-colors"}]])])))})))

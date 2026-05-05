@@ -10,8 +10,11 @@ Backend:
 Frontend:
 
 - install deps: npm install
-- dev: shadow-cljs watch app
-- build: shadow-cljs release app
+- dev (JS):  shadow-cljs watch app
+- dev (CSS): npm run css:watch   (run in parallel with JS dev)
+- build (JS):  shadow-cljs release app
+- build (CSS): npm run css:build
+
 
 ---
 

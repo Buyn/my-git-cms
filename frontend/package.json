@@ -1,8 +1,13 @@
 {
   "name": "my-git-cms-frontend",
   "version": "1.0.0",
+  "scripts": {
+    "css:watch": "tailwindcss -i src/app/styles.css -o public/css/main.css --watch",
+    "css:build": "tailwindcss -i src/app/styles.css -o public/css/main.css --minify"
+  },
   "devDependencies": {
-    "shadow-cljs": "2.28.18"
+    "shadow-cljs": "2.28.18",
+    "tailwindcss": "3.4.17"
   },
   "dependencies": {
     "react": "18.3.1",
