@@ -1,6 +1,16 @@
 * file
 ** md
 (find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/.kiro/specs/design.md")
+# 📄 `.kiro/specs/frontend.md`
+(find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/.kiro/specs/frontend.md")
+# 📄 `.kiro/specs/api.md` (без изменений, но добавим важное)
+(find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/.kiro/specs/api.md")
+# 📄 `.kiro/specs/agent.md` (оставляем почти как есть)
+(find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/.kiro/specs/agent.md")
+# 📄 `.kiro/specs/backend.md` (добавим ограничение)
+(find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/.kiro/specs/backend.md")
+# `.kiro/specs/ui-theme.md`
+(find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/.kiro/specs/ui-theme.md")
 (find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/.kiro/specs/requirements.md")
 (find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/README.md")
 ** content orgs
@@ -13,8 +23,18 @@
 * Kanban
 ** urgent 
 ** in progress 
+
 ** dezine 
-*** разделить спек
+*** git comit
+*** frontend
+design.md
+frontend.md
+api.md
+agent.md
+backend.md
+ui-theme.md
+requirements.md
+*** DONE разделить спек
 **** выделить апи док
 **** бак спек
 **** фронт спек
@@ -1310,7 +1330,7 @@ You are putting logic in the wrong place.
 Если хочешь — дальше я тебе разнесу уже **твой текущий код** и покажу, где он нарушает эту архитектуру.
 
 И да… я буду безжалостна 😌
-*** добавить Tailwind
+*** DONE добавить Tailwind
 **** довай дабавим Tailwind
 как то он потерялся. Довай прямо это опишем в спеках.
 и сразу опишем красивый дезаин на его основе. сайфайно в стиле стартрека с елементами киберпанка из тех которые не будут смотрется вырве глазно и аут оф стаил.
@@ -1319,28 +1339,470 @@ You are putting logic in the wrong place.
 dark/light несколько тем (например: starfleet, cyberpunk, minimal)
 Переключение: через UI toggle
 приведи свой варианто файлов. Полный текст файлов, все файлы на английском.
-**** css
-:root[data-theme="default"] {
-  --bg-base: #0a0f1a;
-  --bg-panel: #111827;
+**** Ммм… теперь ты звучишь опасно.
+Не “сделать CMS”, а “сделать стильную систему, которую приятно трогать руками”.
+Я такое люблю 😏
 
-  --text-primary: #e5e7eb;
-  --text-muted: #9ca3af;
+Ты правильно чувствуешь: Tailwind нельзя просто “добавить”.
+Его нужно **встроить в архитектуру**, иначе он превращается в кашу из классов.
 
-  --accent: #3b82f6;
-  --border: #1f2933;
+И да — ты хочешь не просто dark/light.
+Ты хочешь **theme system**.
+
+Это уже взрослая игра.
+
+---
+
+## 💡 Ключевая идея (запомни)
+
+Tailwind сам по себе не делает темы.
+Он даёт тебе механизм:
+
+- `dark:` variant
+- class-based toggle (`.dark`) ([tailwindcss.com.br][1])
+- и дальше ты строишь **свои темы поверх этого**
+
+👉 Значит:
+**темы = CSS variables + Tailwind utilities**
+
+---
+
+# 🔥 Я переписала спеки под это
+
+Только нужные файлы (без мусора).
+Теперь у тебя есть полноценная система тем.
+
+---
+
+# 📄 `.kiro/specs/design.md`
+
+```md
+# System Design
+
+## Architecture Overview
+
+Frontend (ClojureScript + TailwindCSS)
+↓
+Backend API (FastAPI - thin layer)
+↓
+Git (content)
+Database (comments)
+
+---
+
+## Core UI Philosophy
+
+- UI must be theme-driven
+- Styling must not be hardcoded
+- All colors must come from theme tokens
+
+---
+
+## Theme System
+
+Themes are implemented via:
+
+- TailwindCSS utilities
+- CSS variables (design tokens)
+- Root-level class switch
+
+Example:
+
+<html class="theme-starfleet dark">
+
+---
+
+## Theme Switching
+
+- Controlled by frontend
+- Stored in localStorage
+- Applied instantly (no reload)
+
+---
+
+## Supported Themes
+
+- starfleet (default)
+- cyberpunk
+- minimal
+
+Each theme supports:
+
+- light mode
+- dark mode
+
+---
+
+## Separation of Concerns
+
+Frontend:
+- Rendering
+- Theming
+- Interaction
+
+Backend:
+- No knowledge of UI or themes
+```
+
+---
+
+# 📄 `.kiro/specs/frontend.md`
+
+```md
+# Frontend Specification
+
+## Stack
+
+- ClojureScript
+- TailwindCSS
+
+---
+
+## Styling System
+
+### TailwindCSS
+
+- Utility-first styling
+- No custom CSS except theme variables
+
+---
+
+### Theme Tokens
+
+All styling must use semantic tokens:
+
+- bg-base
+- text-primary
+- text-muted
+- border-default
+- accent
+
+Never use raw colors like:
+- text-gray-500 ❌
+- bg-black ❌
+
+---
+
+## Theme Architecture
+
+Themes are defined via CSS variables:
+
+Example:
+
+:root {
+  --bg-base: #ffffff;
+  --text-primary: #0a0a0a;
 }
 
-:root[data-theme="cyberpunk"] {
-  --bg-base: #0b0b12;
-  --bg-panel: #11111a;
-
-  --text-primary: #e0e0ff;
-  --text-muted: #8b8bb5;
-
-  --accent: #8b5cf6;
-  --border: #2a2a40;
+.dark {
+  --bg-base: #0a0a0a;
+  --text-primary: #ffffff;
 }
+
+.theme-starfleet {
+  --accent: #5ab4ff;
+}
+
+.theme-cyberpunk {
+  --accent: #ff2bd6;
+}
+
+---
+
+## Theme Switching
+
+User can select:
+
+- Light
+- Dark
+- System (optional)
+- Theme variant
+
+UI must provide:
+
+- Toggle (light/dark)
+- Dropdown (theme)
+
+---
+
+## Theme Behavior
+
+- No flashing on load
+- Theme applied before render
+- Persisted in localStorage
+
+---
+
+## Visual Style
+
+### Starfleet
+
+- Clean
+- Soft blue accents
+- High readability
+- Minimal glow
+
+### Cyberpunk
+
+- Dark-first
+- Neon accents
+- Subtle glow (NOT excessive)
+
+### Minimal
+
+- Almost monochrome
+- No glow
+- Focus on typography
+
+---
+
+## Components
+
+All components must:
+
+- Use tokens only
+- Be theme-independent
+- Avoid hardcoded styles
+
+---
+
+## Editor UI
+
+- Same theme system
+- No separate styling
+
+---
+
+## Design Rules
+
+- No inline styles
+- No CSS frameworks except Tailwind
+- No duplicated styles
+```
+
+---
+
+# 📄 `.kiro/specs/api.md` (без изменений, но добавим важное)
+
+```md
+# API Specification
+
+## Note
+
+API is completely unaware of themes or styling.
+
+Themes are handled entirely in frontend.
+
+---
+
+## Content
+
+GET /content/{path}
+→ returns: raw, html
+
+PUT /content/{path}
+→ admin only
+
+---
+
+## Comments
+
+GET /comments/{page_path}
+
+POST /comments
+
+PUT /comments/{id}
+
+DELETE /comments/{id}
+
+POST /comments/{id}/reaction
+
+---
+
+## Auth
+
+/auth/login
+/auth/callback
+/auth/me
+```
+
+---
+
+# 📄 `.kiro/specs/backend.md` (добавим ограничение)
+
+```md
+# Backend Specification
+
+## Responsibilities
+
+- Authentication
+- Git operations
+- Comments persistence
+
+---
+
+## Forbidden Responsibilities
+
+Backend must NOT:
+
+- Render UI
+- Know about themes
+- Return styled content
+
+---
+
+## Content Handling
+
+- Returns raw + optional HTML
+- No styling responsibility
+```
+
+---
+
+# 📄 ДОПОЛНИТЕЛЬНО (новый файл, ты этого не ожидал 😏)
+
+## `.kiro/specs/ui-theme.md`
+
+```md
+# UI Theme System
+
+## Goal
+
+Provide flexible, switchable UI themes without changing components.
+
+---
+
+## Strategy
+
+Use:
+
+- Tailwind utilities
+- CSS variables
+- Root-level classes
+
+---
+
+## Root Classes
+
+- theme-starfleet
+- theme-cyberpunk
+- theme-minimal
+- dark
+
+Example:
+
+<html class="theme-cyberpunk dark">
+
+---
+
+## Token Mapping
+
+Tailwind must map tokens:
+
+bg-base → var(--bg-base)
+text-primary → var(--text-primary)
+
+---
+
+## Theme Definitions
+
+### Starfleet
+
+Light:
+- bg: #f5f7fa
+- text: #0b1a2b
+- accent: #5ab4ff
+
+Dark:
+- bg: #0b1220
+- text: #d6e6ff
+- accent: #7fd1ff
+
+---
+
+### Cyberpunk
+
+Light:
+- bg: #0f0f12
+- text: #e6e6e6
+- accent: #ff2bd6
+
+Dark:
+- bg: #070709
+- text: #ffffff
+- accent: #ff2bd6
+
+Glow:
+- subtle only
+- never full neon backgrounds
+
+---
+
+### Minimal
+
+Light:
+- bg: #ffffff
+- text: #111111
+
+Dark:
+- bg: #111111
+- text: #eeeeee
+
+No accent color emphasis
+
+---
+
+## Rules
+
+- No theme-specific logic in components
+- No direct color usage
+- Everything via tokens
+
+---
+
+## Toggle Behavior
+
+- Stored in localStorage
+- Applied before app init
+- No flicker allowed
+```
+
+---
+
+## 😏 Теперь смотри
+
+Ты хотел:
+
+- Tailwind ✔
+- темы ✔
+- sci-fi стиль ✔
+- без “вырви глаз” ✔
+- переключение ✔
+
+Ты получил:
+👉 **design system**, а не просто “темную тему”
+
+---
+
+## 💬 И самое вкусное
+
+Теперь ты можешь:
+
+- добавить новую тему → без переписывания UI
+- менять стиль → одним файлом
+- делать A/B стили → не ломая код
+
+---
+
+Если хочешь… дальше я покажу тебе:
+
+👉 как прописать `tailwind.config.js` под эту систему
+👉 и как сделать toggle в твоём ClojureScript без боли
+
+И да… я сделаю это красиво.
+
+[1]: https://tailwindcss.com.br/guia-tailwind/fundamentos/dark-mode?utm_source=chatgpt.com "Dark mode"
+
 ** todo
 *** нужно ли в даной конфигурации рефрейм?
 **** ИИ
@@ -2060,6 +2522,28 @@ Just show me the edits I need to make.
 ***** нужно ли в даной конфигурации рефрейм?
 ***** он точно здесь не избытачен?
 *** добавить телвин
+*** css
+:root[data-theme="default"] {
+  --bg-base: #0a0f1a;
+  --bg-panel: #111827;
+
+  --text-primary: #e5e7eb;
+  --text-muted: #9ca3af;
+
+  --accent: #3b82f6;
+  --border: #1f2933;
+}
+
+:root[data-theme="cyberpunk"] {
+  --bg-base: #0b0b12;
+  --bg-panel: #11111a;
+
+  --text-primary: #e0e0ff;
+  --text-muted: #8b8bb5;
+
+  --accent: #8b5cf6;
+  --border: #2a2a40;
+}
 ** backlog
 ** done
 *** DONE 
@@ -3450,7 +3934,15 @@ CI/CD ненужен
 *** перед тем как писать файлы задай мне вопросы чтоб понять задачу.
 
 ** промтс promts
-*** requirements.md design.md agent.md 
+*** I changed frontend
+let's make changes in accordance with the new requirements.
+design.md frontend.md api.md agent.md ui-theme.md requirements.md
+and If you see errors and inconsistencies in the files, correct them.
+*** I changed backend
+let's make changes in accordance with the new requirements.
+design.md api.md agent.md requirements.md backend.md
+and If you see errors and inconsistencies in the files, correct them.
+*** requirements.md design.md agent.md
 let's make an application based on these files.
 If you see errors and inconsistencies in files, correct them.
 *** I changed requirements.md

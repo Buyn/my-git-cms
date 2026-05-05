@@ -40,10 +40,9 @@ Frontend:
 - Functional style where possible
 - Immutable data structures
 - Clear separation:
-
-  * API
-  * Services
-  * Models
+  - API
+  - Services
+  - Models
 
 ---
 

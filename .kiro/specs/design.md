@@ -2,187 +2,108 @@
 
 ## Architecture Overview
 
-Frontend (ClojureScript)
+Frontend (ClojureScript + TailwindCSS)
 ↓
-FastAPI (thin API layer)
+Backend API (FastAPI - thin layer)
 ↓
-Git repository (content)
+Git (content)
 Database (comments)
+
+---
+
+## Core Principles
+
+- Git is the only source of truth for content
+- Backend is a transport and integration layer
+- Frontend owns rendering and interaction
+- Clear separation between layers
+
+---
+
+## Data Flow
+
+1. Frontend requests content
+2. Backend reads from Git
+3. Backend returns raw + processed content
+4. Frontend renders and handles UI
 
 ---
 
 ## Directory Structure
 
 /backend
-/api
-/services
-/models
+  /api
+  /services
+  /models
 
 /frontend
-/src
+  /src
 
 /Docs
-*.org
+  *.org
 
 /media
-assets
+  assets
 
 ---
 
-## Content Handling
+## Core UI Philosophy
 
-### Parsing
-
-- Use Org-mode parser (Python side initially).
-- Convert to structured JSON or HTML.
-
-### Rendering
-
-- Prefer rendering in frontend.
-- Backend may pre-process content.
+- UI must be theme-driven
+- Styling must not be hardcoded
+- All colors must come from theme tokens
 
 ---
 
-## Git Integration
+## Theme System
 
-### Strategy
+Themes are implemented via:
 
-- Use Git CLI or library.
-- Operations:
+- TailwindCSS utilities
+- CSS variables (design tokens)
+- Root-level class switch
 
-  * Read content
-  * Commit changes
-  * Pull updates
+Example:
 
-### Auth
-
-- OAuth via GitHub/GitLab.
-- Store tokens securely.
+<html class="theme-starfleet dark">
 
 ---
 
-## API Design
+## Theme Switching
 
-### Content
-
-- GET /content/{path}
-- PUT /content/{path}
-
-### Comments
-
-- GET /comments/{page}
-- POST /comments
-- PUT /comments/{id}
-- DELETE /comments/{id}
-- POST /comments/{id}/reaction
-
-### Auth
-
-- /auth/login
-- /auth/callback
+- Controlled by frontend
+- Stored in localStorage
+- Applied instantly (no reload)
 
 ---
 
-## Database
+## Supported Themes
 
-Use relational DB (SQLite or PostgreSQL).
+- starfleet (default)
+- cyberpunk
+- minimal
 
-Tables:
+Each theme supports:
 
-- users
-- comments
-- reactions
-
----
-
-## Comments Model
-
-Comment:
-
-- id
-- author_id
-- content
-- page_path
-- created_at
-- updated_at
-
-Reaction:
-
-- user_id
-- comment_id
-- type
+- light mode
+- dark mode
 
 ---
 
-## Frontend (ClojureScript)
+## Separation of Concerns
 
-### Responsibilities
+Frontend:
+- Rendering
+- Navigation
+- Editing
+- Theming
+- State management
+- Interaction
 
-- Routing (based on file paths)
-- Rendering Org content
-- Editor UI
-- API communication
-
-### State
-
-- Centralized (re-frame or similar)
-
----
-
-## Editor
-
-- Edit raw Org text
-- Preview mode
-- Save triggers Git commit
-
----
-
-## Media Handling
-
-- Stored in /media
-- Referenced via relative paths
-- Served via backend
-
----
-
-## Auth Flow
-
-1. User clicks login
-2. Redirect to Git provider
-3. Callback to backend
-4. Token stored
-5. Session created
-
----
-
-## Deployment (PythonAnywhere)
-
-- Use WSGI/ASGI compatible setup
-- Avoid background workers
-- Use simple DB setup
-- Static files served via platform
-
----
-
-## Testing Strategy
-
-- Backend:
-
-  * pytest
-  * API tests
-
-- Frontend:
-
-  * basic rendering tests
-
----
-
-## Migration Strategy
-
-To Clojure backend:
-
-- Keep business logic separate
-- Avoid FastAPI-specific patterns
-- Keep API thin
+Backend:
+- Authentication
+- Git interaction
+- Comment persistence
+```
 
 ---
