@@ -2,6 +2,15 @@
 
 ## Content
 
+### GET /content/list
+
+Returns list of all content file paths.
+
+Response:
+- array of strings (filenames)
+
+---
+
 ### GET /content/{path}
 
 Returns content for a given path.
@@ -97,7 +106,13 @@ Response:
 - email
 - username
 - role
-```
+- verified
+
+---
+
+### POST /auth/logout
+
+Clears session cookie
 
 ---
 ## Note

@@ -5,9 +5,10 @@
             [app.api :as api]))
 
 (defn editor [m]
-  (let [path (get-in m [:path-params :path])
-        content (r/atom nil)
-        preview? (r/atom false)]
+  (let [path     (get-in m [:path-params :path])
+        content  (r/atom nil)
+        preview? (r/atom false)
+        message  (r/atom (str "Update " path))]
     (r/create-class
      {:component-did-mount #(rf/dispatch [::api/load-post path])
       :reagent-render
@@ -24,11 +25,18 @@
               [:button.btn-ghost {:on-click #(swap! preview? not)}
                (if @preview? "Edit" "Preview")]
               [:button.btn-primary
-               {:on-click #(rf/dispatch [::api/save-post path @content])}
+               {:on-click #(rf/dispatch [::api/save-post path @content @message])}
                "Save"]]
              (if @preview?
                [:div.post-content
                 {:dangerouslySetInnerHTML {:__html (:html post)}}]
-               [:textarea.editor-area
-                {:value (or @content "")
-                 :on-change #(reset! content (.. % -target -value))}])])))})))
+               [:<>
+                [:textarea.editor-area
+                 {:value     (or @content "")
+                  :on-change #(reset! content (.. % -target -value))}]
+                [:input.comment-form
+                 {:type        "text"
+                  :placeholder "Commit message"
+                  :value       @message
+                  :on-change   #(reset! message (.. % -target -value))
+                  :style       {:margin-top "0.5rem"}}]])])))})))

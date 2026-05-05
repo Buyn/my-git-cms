@@ -78,4 +78,12 @@ def me(request: Request):
     user = get_current_user(request)
     if user is None:
         return JSONResponse({"user": None})
-    return {"id": user.id, "username": user.username, "email": user.email, "role": user.role}
+    return {"id": user.id, "username": user.username, "email": user.email,
+            "role": user.role, "verified": user.verified}
+
+
+@router.post("/auth/logout")
+def logout():
+    response = JSONResponse({"ok": True})
+    response.delete_cookie(COOKIE_NAME)
+    return response

@@ -7,6 +7,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/main.css">
+  <!-- Anti-flicker: apply stored theme before first paint -->
+  <script>
+    (function () {
+      var theme = localStorage.getItem('theme') || 'theme-starfleet';
+      var dark  = localStorage.getItem('dark-mode') === 'true';
+      var el    = document.documentElement;
+      el.className = theme + (dark ? ' dark' : '');
+    })();
+  </script>
 </head>
 <body>
   <div id="app"></div>

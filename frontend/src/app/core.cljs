@@ -5,6 +5,7 @@
             [reitit.frontend :as rfe]
             [reitit.frontend.easy :as rfee]
             [app.state :as s]
+            [app.api :as api]
             [app.views.nav :refer [nav]]
             [app.views.home :refer [home]]
             [app.views.post :refer [post]]
@@ -16,15 +17,16 @@
      [:h1.page-title "Profile"]
      (if user
        [:div
-        [:p [:strong "Email: "] (:email user)]
-        [:p [:strong "Role: "] (:role user)]]
+        [:p [:strong "Username: "] (:username user)]
+        [:p [:strong "Email: "]    (:email user)]
+        [:p [:strong "Role: "]     (:role user)]]
        [:p "Not logged in."])]))
 
 (def routes
-  [["/" {:name ::home :view home}]
-   ["/post/:path" {:name ::post :view post}]
-   ["/edit/:path" {:name ::editor :view editor}]
-   ["/profile" {:name ::profile :view profile}]])
+  [["/"           {:name ::home    :view home}]
+   ["/post/:path" {:name ::post    :view post}]
+   ["/edit/:path" {:name ::editor  :view editor}]
+   ["/profile"    {:name ::profile :view profile}]])
 
 (defonce match (r/atom nil))
 
@@ -40,6 +42,7 @@
 
 (defn init []
   (rf/dispatch-sync [::s/initialize-db])
+  (rf/dispatch [::api/load-user])
   (rfee/start!
    (rfe/router routes)
    (fn [m] (reset! match m))

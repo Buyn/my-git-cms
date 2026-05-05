@@ -5,7 +5,7 @@
             [app.api :as api]))
 
 (defn comment-form [page-path]
-  (let [text (r/atom "")
+  (let [text  (r/atom "")
         email (r/atom "")]
     (fn []
       [:form.comment-form
@@ -15,17 +15,21 @@
                        (rf/dispatch [::api/post-comment page-path @text @email])
                        (reset! text "")
                        (reset! email "")))}
-       [:input {:type "email" :placeholder "Email (optional)"
-                :value @email :on-change #(reset! email (.. % -target -value))}]
+       [:input {:type        "email"
+                :placeholder "Email (anonymous)"
+                :value       @email
+                :on-change   #(reset! email (.. % -target -value))}]
        [:textarea {:placeholder "Write a comment..."
-                   :value @text :on-change #(reset! text (.. % -target -value))}]
+                   :value       @text
+                   :on-change   #(reset! text (.. % -target -value))}]
        [:button.btn-primary {:type "submit"} "Post"]])))
 
 (defn reaction-bar [comment-id]
   [:div.reactions
    (for [emoji ["👍" "❤️" "🚀" "👀"]]
      ^{:key emoji}
-     [:button.reaction {:on-click #(rf/dispatch [::api/add-reaction comment-id emoji])}
+     [:button.reaction
+      {:on-click #(rf/dispatch [::api/add-reaction comment-id emoji])}
       emoji])])
 
 (defn comments-section [page-path]
@@ -34,7 +38,7 @@
     :reagent-render
     (fn [page-path]
       (let [comments @(rf/subscribe [::s/comments])
-            user @(rf/subscribe [::s/user])]
+            user     @(rf/subscribe [::s/user])]
         [:section.comments
          [:h3 "Comments"]
          [comment-form page-path]
@@ -43,9 +47,12 @@
             ^{:key (:id c)}
             [:div.comment-card
              [:div.comment-meta
-              [:span.comment-author (:email c)]
-              [:span.comment-date (:created_at c)]
-              (when (or (= (:role user) "admin") (= (:email user) (:email c)))
-                [:button.btn-danger {:on-click #(rf/dispatch [::api/delete-comment (:id c) page-path])} "×"])]
-             [:p (:text c)]
+              [:span.comment-author (or (:username c) (:anon_email c) "anonymous")]
+              [:span.comment-date   (:created_at c)]
+              (when (or (= (:role user) "admin")
+                        (= (:id user) (:user_id c)))
+                [:button.btn-danger
+                 {:on-click #(rf/dispatch [::api/delete-comment (:id c) page-path])}
+                 "×"])]
+             [:p (:content c)]          ; API field is :content, not :text
              [reaction-bar (:id c)]])]]))}))
