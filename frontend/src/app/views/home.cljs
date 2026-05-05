@@ -1,6 +1,7 @@
 (ns app.views.home
   (:require [re-frame.core :as rf]
             [reagent.core :as r]
+            [reitit.frontend.easy :as rfee]
             [app.state :as s]
             [app.api :as api]))
 
@@ -19,4 +20,4 @@
             (for [p posts]
               ^{:key p}
               [:li.post-item
-               [:a {:href (str "/post/" p)} p]])])]))}))
+               [:a {:href (rfee/href :app.core/post {:path p})} p]])])]))}))

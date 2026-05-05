@@ -4,3 +4,4 @@ __pycache__/
 .env
 /frontend/public/js/
 /frontend/.shadow-cljs/
+.aider*

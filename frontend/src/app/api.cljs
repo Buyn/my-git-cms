@@ -50,7 +50,7 @@
 (rf/reg-event-fx ::load-comments
   (fn [_ [_ page-path]]
     {:fx [[:effect/fetch {:method "GET"
-                          :path (str "/comments?path=" (js/encodeURIComponent page-path))
+                          :path (str "/comments/" (js/encodeURIComponent page-path))
                           :on-success #(rf/dispatch [::s/set-comments %])
                           :on-error #(rf/dispatch [::s/set-error %])}]]}))
 
@@ -58,7 +58,7 @@
   (fn [_ [_ page-path text email]]
     {:fx [[:effect/fetch {:method "POST"
                           :path "/comments"
-                          :body {:page_path page-path :text text :email email}
+                          :body {:page_path page-path :content text :anon_email email}
                           :on-success #(rf/dispatch [::load-comments page-path])
                           :on-error #(rf/dispatch [::s/set-error %])}]]}))
 
@@ -72,6 +72,6 @@
 (rf/reg-event-fx ::add-reaction
   (fn [_ [_ comment-id type]]
     {:fx [[:effect/fetch {:method "POST"
-                          :path (str "/comments/" comment-id "/reactions")
+                          :path (str "/comments/" comment-id "/reaction")
                           :body {:type type}
                           :on-error #(rf/dispatch [::s/set-error %])}]]}))

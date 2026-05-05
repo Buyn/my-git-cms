@@ -1,5 +1,6 @@
 (ns app.core
-  (:require [reagent.dom.client :as rdomc]
+  (:require [reagent.core :as r]
+            [reagent.dom.client :as rdomc]
             [re-frame.core :as rf]
             [reitit.frontend :as rfe]
             [reitit.frontend.easy :as rfee]
@@ -25,7 +26,7 @@
    ["/edit/:path" {:name ::editor :view editor}]
    ["/profile" {:name ::profile :view profile}]])
 
-(defonce match (atom nil))
+(defonce match (r/atom nil))
 
 (defn app []
   (let [error @(rf/subscribe [::s/error])]

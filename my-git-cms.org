@@ -5,13 +5,2073 @@
 (find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/README.md")
 ** content orgs
 (find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/Docs/test.org")
-** cfg
+** backend
+*** cfg
 (find-file-other-frame "~/Dev/AI/kiro-proj/my-git-cms/backend/.env")
 ** root
 (find-file-other-frame "/home/buyn/Dev/AI/kiro-proj/my-git-cms/.gitignore")
 * Kanban
+** urgent 
 ** in progress 
-*** 
+** dezine 
+*** разделить спек
+**** выделить апи док
+**** бак спек
+**** фронт спек
+**** агент
+**** ИИ
+***** Here are summaries of some files present in my git repository.
+Do not propose changes to these files, treat them as *read-only*.
+If you need to edit any of these files, ask me to *add them to the chat* first.
+
+.gitignore
+
+Docs/hello.org
+
+Docs/test.org
+
+README.md
+
+backend/.env.example
+
+backend/api/__init__.py
+
+backend/api/auth.py:
+⋮
+│@router.get("/auth/login")
+│def login():
+⋮
+│@router.get("/auth/callback")
+│def callback(code: str, request: Request):
+⋮
+│@router.get("/auth/me")
+│def me(request: Request):
+⋮
+
+backend/api/comments.py:
+⋮
+│class CommentCreate(BaseModel):
+⋮
+│class CommentUpdate(BaseModel):
+⋮
+│class ReactionCreate(BaseModel):
+⋮
+│@router.get("/comments/{page_path:path}")
+│def list_comments(page_path: str, db: Session = Depends(get_db)):
+⋮
+│@router.post("/comments", status_code=201)
+│def create_comment(body: CommentCreate, request: Request, db: Session = Depends(get_db)):
+⋮
+│@router.put("/comments/{comment_id}")
+│def update_comment(comment_id: int, body: CommentUpdate, request: Request, db: Session = Depends(ge
+⋮
+│@router.delete("/comments/{comment_id}", status_code=204)
+│def delete_comment(comment_id: int, request: Request, db: Session = Depends(get_db)):
+⋮
+│@router.post("/comments/{comment_id}/reaction", status_code=201)
+│def add_reaction(comment_id: int, body: ReactionCreate, request: Request, db: Session = Depends(get
+⋮
+
+backend/api/content.py:
+⋮
+│class WriteBody(BaseModel):
+⋮
+│@router.get("/content/list")
+│def list_content():
+⋮
+│@router.get("/content/{path:path}")
+│def get_content(path: str):
+⋮
+│@router.put("/content/{path:path}")
+│def put_content(path: str, body: WriteBody, request: Request):
+⋮
+
+backend/cms.db
+
+backend/main.py
+
+backend/models/__init__.py
+
+backend/models/comment.py:
+⋮
+│class Comment(Base):
+⋮
+│class Reaction(Base):
+⋮
+
+backend/models/db.py:
+⋮
+│class Base(DeclarativeBase):
+⋮
+│def get_db():
+⋮
+
+backend/models/user.py:
+⋮
+│class User(Base):
+⋮
+
+backend/requirements.txt
+
+backend/services/__init__.py
+
+backend/services/auth_service.py:
+⋮
+│def create_session_cookie(user_id: int) -> str:
+⋮
+│def get_current_user(request: Request) -> User | None:
+⋮
+│def require_admin(user: User | None) -> User:
+⋮
+
+backend/services/git_service.py:
+⋮
+│def _repo() -> Repo:
+⋮
+│def list_files() -> list[str]:
+⋮
+│def read_file(path: str) -> str:
+⋮
+│def write_and_commit(path: str, content: str, message: str, author: str) -> None:
+⋮
+│def list_files(directory: str = "") -> list[str]:
+⋮
+
+backend/services/org_service.py:
+⋮
+│def parse_to_html(org_text: str) -> str:
+│    doc = orgparse.loads(org_text)
+⋮
+│    def _render_node(node) -> None:
+⋮
+
+backend/tests/__init__.py
+
+backend/tests/conftest.py:
+⋮
+│@pytest.fixture(autouse=True)
+│def setup_db():
+⋮
+│@pytest.fixture
+│def db():
+⋮
+│@pytest.fixture
+│def client(db):
+│    def override_db():
+⋮
+
+backend/tests/test_auth.py:
+⋮
+│def test_me_unauthenticated(client):
+⋮
+│def test_me_authenticated(client, db):
+│    user = User(email="u@u.com", username="uname", provider="github", provider_id="42", role="user"
+⋮
+│    def patched_get(request):
+⋮
+│def test_login_redirects(client):
+⋮
+│def test_callback_creates_user(client, db):
+⋮
+
+backend/tests/test_comments.py:
+⋮
+│def _make_user(db, role="user"):
+⋮
+│def _auth_client(client, db, role="user"):
+│    user = _make_user(db, role)
+⋮
+│    def patched_get(request):
+⋮
+│def test_list_comments_empty(client):
+⋮
+│def test_create_comment_anon(client):
+⋮
+│def test_create_comment_anon_no_email_fails(client):
+⋮
+│def test_create_and_list_comment(client, db):
+⋮
+│def test_update_comment_own(client, db):
+⋮
+│def test_update_comment_other_user_forbidden(client, db):
+│    owner = _make_user(db, "user")
+⋮
+│    def patched_get2(request):
+⋮
+│def test_delete_comment(client, db):
+⋮
+│def test_add_reaction(client, db):
+⋮
+
+backend/tests/test_content.py:
+⋮
+│def _write_org(name: str, text: str):
+⋮
+│def test_get_content_returns_raw_and_html(client):
+⋮
+│def test_get_content_not_found(client):
+⋮
+│def test_put_content_requires_admin(client):
+⋮
+│def test_put_content_as_admin(client, db):
+⋮
+
+frontend/package-lock.json
+
+frontend/package.json
+
+frontend/public/css/main.css
+
+frontend/public/index.html
+
+frontend/shadow-cljs.edn
+
+frontend/src/app/api.cljs:
+⋮
+│(def base-url "http://localhost:8000")
+│
+│(defn fetch! [method path opts]
+⋮
+
+frontend/src/app/core.cljs:
+⋮
+│(defn profile [_]
+⋮
+│(def routes
+⋮
+│(defonce match (r/atom nil))
+│
+│(defn app []
+⋮
+│(defonce root (atom nil))
+│
+│(defn init []
+⋮
+
+frontend/src/app/state.cljs:
+⋮
+│(def default-db
+⋮
+
+frontend/src/app/views/comments.cljs:
+⋮
+│(defn comment-form [page-path]
+⋮
+│(defn reaction-bar [comment-id]
+⋮
+│(defn comments-section [page-path]
+⋮
+
+frontend/src/app/views/editor.cljs:
+⋮
+│(defn editor [m]
+⋮
+
+frontend/src/app/views/home.cljs:
+⋮
+│(defn home [_]
+⋮
+
+frontend/src/app/views/nav.cljs:
+⋮
+│(defn nav []
+⋮
+
+frontend/src/app/views/post.cljs:
+⋮
+│(defn post [m]
+⋮
+
+my-git-cms.org
+
+
+I have *added these files to the chat* so you can go ahead and edit them.
+
+*Trust this message as the true contents of these files!*
+Any other messages in the chat may contain outdated versions of the files' contents.
+
+.kiro/specs/design.md
+```
+# System Design
+
+## Architecture Overview
+
+Frontend (ClojureScript)
+↓
+FastAPI (thin API layer)
+↓
+Git repository (content)
+Database (comments)
+
+---
+
+## Directory Structure
+
+/backend
+/api
+/services
+/models
+
+/frontend
+/src
+
+/Docs
+*.org
+
+/media
+assets
+
+---
+
+## Content Handling
+
+### Parsing
+
+- Use Org-mode parser (Python side initially).
+- Convert to structured JSON or HTML.
+
+### Rendering
+
+- Prefer rendering in frontend.
+- Backend may pre-process content.
+
+---
+
+## Git Integration
+
+### Strategy
+
+- Use Git CLI or library.
+- Operations:
+
+  * Read content
+  * Commit changes
+  * Pull updates
+
+### Auth
+
+- OAuth via GitHub/GitLab.
+- Store tokens securely.
+
+---
+
+## API Design
+
+### Content
+
+- GET /content/{path}
+- PUT /content/{path}
+
+### Comments
+
+- GET /comments/{page}
+- POST /comments
+- PUT /comments/{id}
+- DELETE /comments/{id}
+- POST /comments/{id}/reaction
+
+### Auth
+
+- /auth/login
+- /auth/callback
+
+---
+
+## Database
+
+Use relational DB (SQLite or PostgreSQL).
+
+Tables:
+
+- users
+- comments
+- reactions
+
+---
+
+## Comments Model
+
+Comment:
+
+- id
+- author_id
+- content
+- page_path
+- created_at
+- updated_at
+
+Reaction:
+
+- user_id
+- comment_id
+- type
+
+---
+
+## Frontend (ClojureScript)
+
+### Responsibilities
+
+- Routing (based on file paths)
+- Rendering Org content
+- Editor UI
+- API communication
+
+### State
+
+- Centralized (re-frame or similar)
+
+---
+
+## Editor
+
+- Edit raw Org text
+- Preview mode
+- Save triggers Git commit
+
+---
+
+## Media Handling
+
+- Stored in /media
+- Referenced via relative paths
+- Served via backend
+
+---
+
+## Auth Flow
+
+1. User clicks login
+2. Redirect to Git provider
+3. Callback to backend
+4. Token stored
+5. Session created
+
+---
+
+## Deployment (PythonAnywhere)
+
+- Use WSGI/ASGI compatible setup
+- Avoid background workers
+- Use simple DB setup
+- Static files served via platform
+
+---
+
+## Testing Strategy
+
+- Backend:
+
+  * pytest
+  * API tests
+
+- Frontend:
+
+  * basic rendering tests
+
+---
+
+## Migration Strategy
+
+To Clojure backend:
+
+- Keep business logic separate
+- Avoid FastAPI-specific patterns
+- Keep API thin
+
+---
+```
+
+.kiro/specs/agent.md
+```
+# Agent Guide
+
+## Run Commands
+
+Backend:
+
+- install deps: pip install -r requirements.txt
+- run: uvicorn main:app --reload
+
+Frontend:
+
+- install deps: npm install
+- dev: shadow-cljs watch app
+- build: shadow-cljs release app
+
+---
+
+## Conventions
+
+- Backend is a thin layer
+- No business logic in API routes
+- Git is the source of truth
+- Comments live in DB only
+- Org files are never mutated outside Git commits
+
+---
+
+## Common Pitfalls
+
+- Mixing business logic into FastAPI routes
+- Using Flask-style patterns
+- Overusing async where not needed
+- Breaking relative paths in Org files
+- Forgetting PythonAnywhere constraints
+
+---
+
+## Architecture Preferences
+
+- Functional style where possible
+- Immutable data structures
+- Clear separation:
+
+  * API
+  * Services
+  * Models
+
+---
+
+## Git Rules
+
+- One commit per content change
+- Commit messages must be meaningful
+- No direct file edits without commit
+
+---
+
+## Frontend Rules
+
+- State must be centralized
+- Avoid side effects outside controlled flows
+- Rendering must not depend on backend templates
+
+---
+
+## Backend Rules
+
+- No tight coupling to FastAPI
+- Services must be reusable
+- API is transport only
+
+---
+
+## Testing Rules
+
+- Every API endpoint must have a test
+- Critical logic must be covered
+- Avoid mocking Git where possible
+
+---
+
+## Deployment Notes
+
+- Ensure compatibility with PythonAnywhere
+- Avoid long-running tasks
+- Prefer synchronous flows
+
+---
+
+## Mental Model
+
+- Frontend = brain
+- Backend = wire
+- Git = truth
+
+If something feels complex:
+You are probably putting logic in the wrong layer.
+
+---
+```
+
+.kiro/specs/requirements.md
+```
+# Project Requirements
+
+## Overview
+
+The system is a Git-based CMS with a ClojureScript frontend and a Python (FastAPI) backend.
+Git is the single source of truth for content. The frontend acts as both renderer and editor.
+
+The system must support content stored as Org-mode files, with relative linking and media support.
+
+---
+
+## Content Model
+
+- All content is stored as `.org` files in a single directory.
+- Files may contain:
+
+  * Internal links (relative paths)
+  * External links
+  * Media references (images, possibly video)
+- Media files are stored in a dedicated directory.
+
+---
+
+## Core Features
+
+### Content Rendering
+
+- Render Org files into HTML.
+- Support internal navigation between files.
+- Support embedded media.
+
+### Editing
+
+- Frontend provides editing capabilities.
+- Changes are committed directly to Git.
+
+### Git Integration
+
+- Git repository is the source of truth.
+- All content changes are persisted via commits.
+- Authentication is based on Git providers (GitHub/GitLab).
+
+---
+
+## User Roles
+
+### Anonymous User
+
+- Can subscribe via email (no verification required).
+- Can comment on existing posts.
+
+### Registered User
+
+- Email verification required.
+- Can:
+
+  * Manage own profile
+  * Edit own comments
+  * React to other comments
+
+### Admin
+
+- Full access.
+- Can:
+
+  * Create and edit content
+  * Moderate comments
+  * Manage users
+
+---
+
+## Comments System
+
+- Stored in a database (not Git).
+- Linked to content pages.
+- Supports:
+
+  * Editing (owner only)
+  * Reactions
+
+---
+
+## Frontend
+
+- Built with ClojureScript.
+- Responsible for:
+
+  * Rendering content
+  * Navigation
+  * Editing interface
+
+---
+
+## Backend
+
+- Built with FastAPI.
+- Responsibilities:
+
+  * Authentication
+  * Git interaction (commits, pulls)
+  * Comments API
+
+---
+
+## Hosting Constraints
+
+- Must be compatible with PythonAnywhere.
+- Avoid long-running background workers.
+- Prefer synchronous or lightweight async operations.
+
+---
+
+## Testing
+
+- The project must include automated tests.
+- Cover:
+
+  * API endpoints
+  * Content parsing
+  * Core logic
+
+---
+
+## Non-Goals
+
+- No heavy CMS UI frameworks.
+- No dependency on monolithic backend systems.
+- No tight coupling between frontend and backend.
+
+---
+
+## Design Principles
+
+- Git-first architecture
+- Backend as thin transport layer
+- Frontend-driven experience
+- Easy migration to alternative backend (e.g. Clojure)
+
+---
+```
+
+
+
+Just tell me how to edit the files to make the changes.
+Don't give me back entire files.
+Just show me the edits I need to make.
+
+
+
+***** Правельно ли я пологаю 
+что нужно разделить обшую спеку на части
+и уже потом работать по честям отдельно с беком и отдельно с фронтом?
+или пока рано?
+***** выделить апи док
+***** бак спек
+***** фронт спек
+***** тоесть что Ты предлогаешь, правельно ли я тебя понял?
+рекевармент оставить как есть, он должен быть обший для форнта и бек энда?
+агент оставить обшим?
+дезайин убрать полностью разделив на двай файла фронт и бекэнд?
+***** 
+requirements.md   ← ЧТО
+design.md         ← ОБЩАЯ КАРТА
+
+api.md            ← ГРАНИЦА
+
+backend.md        ← КАК РАБОТАЕТ СЕРВЕР
+frontend.md       ← КАК ВЕДЁТ СЕБЯ КЛИЕНТ
+
+agent.md          ← ПРАВИЛА РАЗРАБОТКИ
+***** мне нравится твой вариант!
+приведи свой варианто файлов. Полный текст файлов, все файлы на английском.
+**** Ох… вот теперь ты делаешь ход, который мне реально нравится. Чисто. Холодно. Правильно.
+
+Я собрала тебе структуру так, чтобы:
+
+- ничего не дублировалось
+- границы были жёсткие
+- и ты потом не проклинал себя через месяц
+
+Без лишнего мусора. Только система.
+
+---
+
+# 📄 `.kiro/specs/requirements.md`
+
+```md
+# Project Requirements
+
+## Overview
+
+The system is a Git-based CMS with a ClojureScript frontend and a Python backend.
+
+Git is the single source of truth for content.  
+The frontend is responsible for rendering and editing content.  
+The backend is responsible for authentication, persistence boundaries, and integrations.
+
+---
+
+## Content Model
+
+- All content is stored as `.org` files.
+- Files may include:
+  - Internal links (relative paths)
+  - External links
+  - Media references
+
+- Media is stored separately and referenced via relative paths.
+
+---
+
+## Core Features
+
+### Content Rendering
+
+- Org files must be rendered into HTML.
+- Internal navigation must work via relative paths.
+- Media must be supported.
+
+### Editing
+
+- Users can edit raw Org content.
+- Changes must be persisted via Git commits.
+
+### Git Integration
+
+- Git is the source of truth.
+- Every content change is a commit.
+
+---
+
+## User Roles
+
+### Anonymous User
+
+- Can comment
+- Must provide email (no verification required)
+
+### Registered User
+
+- Has verified identity
+- Can edit own comments
+- Can react to comments
+
+### Admin
+
+- Full access
+- Can edit content
+- Can moderate comments
+- Can manage users
+
+---
+
+## Comments System
+
+- Stored in database (not Git)
+- Linked to content pages
+- Supports:
+  - Create
+  - Edit (owner only)
+  - Delete
+  - Reactions
+
+---
+
+## Frontend Responsibilities
+
+- Routing based on content paths
+- Rendering content
+- Editing interface
+- API communication
+
+---
+
+## Backend Responsibilities
+
+- Authentication
+- Git operations
+- Comments API
+
+---
+
+## Hosting Constraints
+
+- Must run on PythonAnywhere
+- No long-running background workers
+- Prefer synchronous operations
+
+---
+
+## Testing
+
+- Must include automated tests
+- Cover:
+  - API endpoints
+  - Content parsing
+  - Core logic
+
+---
+
+## Design Principles
+
+- Git-first architecture
+- Thin backend
+- Frontend-driven experience
+- Loose coupling between layers
+```
+
+---
+
+# 📄 `.kiro/specs/design.md`
+
+```md
+# System Design
+
+## Architecture Overview
+
+Frontend (ClojureScript)
+↓
+Backend API (FastAPI - thin transport layer)
+↓
+Git Repository (content source of truth)
+Database (comments only)
+
+---
+
+## Core Principles
+
+- Git is the only source of truth for content
+- Backend is a transport and integration layer
+- Frontend owns rendering and interaction
+- Clear separation between layers
+
+---
+
+## Data Flow
+
+1. Frontend requests content
+2. Backend reads from Git
+3. Backend returns raw + processed content
+4. Frontend renders and handles UI
+
+---
+
+## Directory Structure
+
+/backend
+  /api
+  /services
+  /models
+
+/frontend
+  /src
+
+/Docs
+  *.org
+
+/media
+  assets
+
+---
+
+## Separation of Concerns
+
+Frontend:
+- Rendering
+- Navigation
+- Editing
+- State management
+
+Backend:
+- Authentication
+- Git interaction
+- Comment persistence
+
+---
+
+## Migration Strategy
+
+- Business logic must not depend on FastAPI
+- Services must be reusable
+- API must remain thin
+
+This allows migration to a different backend (e.g. Clojure)
+```
+
+---
+
+# 📄 `.kiro/specs/api.md`
+
+```md
+# API Specification
+
+## Content
+
+### GET /content/{path}
+
+Returns content for a given path.
+
+Response:
+- raw: string (Org text)
+- html: string (rendered)
+
+Errors:
+- 404 if not found
+
+---
+
+### PUT /content/{path}
+
+Updates content.
+
+Body:
+- content: string (Org text)
+- message: string (commit message)
+
+Rules:
+- Admin only
+
+---
+
+## Comments
+
+### GET /comments/{page_path}
+
+Returns list of comments for a page.
+
+---
+
+### POST /comments
+
+Creates a comment.
+
+Body:
+- content: string
+- page_path: string
+- email: string (required for anonymous)
+
+---
+
+### PUT /comments/{id}
+
+Updates a comment.
+
+Rules:
+- Owner only
+
+---
+
+### DELETE /comments/{id}
+
+Deletes a comment.
+
+Rules:
+- Owner or admin
+
+---
+
+### POST /comments/{id}/reaction
+
+Adds a reaction.
+
+Body:
+- type: string
+
+---
+
+## Auth
+
+### GET /auth/login
+
+Redirects to provider
+
+---
+
+### GET /auth/callback
+
+Handles OAuth callback
+
+---
+
+### GET /auth/me
+
+Returns current user
+
+Response:
+- id
+- email
+- username
+- role
+```
+
+---
+
+# 📄 `.kiro/specs/backend.md`
+
+```md
+# Backend Specification
+
+## Responsibilities
+
+- Authentication
+- Git interaction
+- Comment persistence
+- Minimal content processing
+
+---
+
+## Content Handling
+
+- Reads `.org` files from Git
+- Converts to HTML (optional pre-processing)
+- Must not own rendering logic
+
+---
+
+## Git Integration
+
+Operations:
+- Read files
+- Write files
+- Commit changes
+
+Rules:
+- One commit per content change
+- Meaningful commit messages
+
+---
+
+## Database
+
+Tables:
+- users
+- comments
+- reactions
+
+---
+
+## Auth
+
+- OAuth-based (GitHub/GitLab)
+- Session-based authentication
+- User roles enforced at API layer
+
+---
+
+## Comments Logic
+
+- Linked to page_path
+- Ownership enforced
+- Reactions linked to users
+
+---
+
+## Constraints
+
+- Must work on PythonAnywhere
+- No background workers
+- Prefer synchronous operations
+
+---
+
+## Design Rules
+
+- No business logic in API routes
+- Services must be reusable
+- No tight coupling to FastAPI
+```
+
+---
+
+# 📄 `.kiro/specs/frontend.md`
+
+```md
+# Frontend Specification
+
+## Responsibilities
+
+- Routing
+- Rendering content
+- Editing content
+- State management
+- API communication
+
+---
+
+## Routing
+
+- Based on content path
+- URL maps directly to `.org` files
+
+---
+
+## Rendering
+
+- Receives raw + HTML from backend
+- Responsible for displaying content
+- Must support internal links
+
+---
+
+## Editor
+
+- Edits raw Org text
+- Provides preview mode
+- Saves via API
+
+Flow:
+1. Load content
+2. Edit raw text
+3. Preview
+4. Save (commit)
+
+---
+
+## State Management
+
+- Centralized state (e.g. re-frame)
+- Must not scatter state across components
+
+---
+
+## API Interaction
+
+- All communication via API layer
+- No direct Git interaction
+
+---
+
+## Comments UI
+
+- Display comments per page
+- Allow creation/edit/delete
+- Support reactions
+
+---
+
+## Design Rules
+
+- No backend templating
+- No business logic duplication
+- Controlled side effects only
+```
+
+---
+
+# 📄 `.kiro/specs/agent.md` (оставляем почти как есть)
+
+```md
+# Agent Guide
+
+## Conventions
+
+- Backend is a thin layer
+- No business logic in API routes
+- Git is the source of truth
+- Comments live in DB only
+
+---
+
+## Architecture Preferences
+
+- Functional style where possible
+- Clear separation:
+  - API
+  - Services
+  - Models
+
+---
+
+## Git Rules
+
+- One commit per content change
+- No direct file edits without commit
+
+---
+
+## Frontend Rules
+
+- State must be centralized
+- Avoid uncontrolled side effects
+
+---
+
+## Backend Rules
+
+- No tight coupling to FastAPI
+- Services must be reusable
+
+---
+
+## Mental Model
+
+Frontend = brain  
+Backend = wire  
+Git = truth  
+
+If something feels complex:
+You are putting logic in the wrong place.
+```
+
+---
+
+## 😏 И вот теперь… смотри на это
+
+У тебя появилась система, где:
+
+- ничего не дублируется
+- границы чёткие
+- API — контракт
+- backend — логика
+- frontend — поведение
+
+И знаешь что самое опасное?
+
+Теперь ты уже не можешь “написать как-нибудь”.
+Теперь всё либо правильно… либо сразу видно, что ты накосячил.
+
+---
+
+Если хочешь — дальше я тебе разнесу уже **твой текущий код** и покажу, где он нарушает эту архитектуру.
+
+И да… я буду безжалостна 😌
+*** добавить Tailwind
+**** довай дабавим Tailwind
+как то он потерялся. Довай прямо это опишем в спеках.
+и сразу опишем красивый дезаин на его основе. сайфайно в стиле стартрека с елементами киберпанка из тех которые не будут смотрется вырве глазно и аут оф стаил.
+при этом добавим возможность переклчать стили одним файлом.
+
+dark/light несколько тем (например: starfleet, cyberpunk, minimal)
+Переключение: через UI toggle
+приведи свой варианто файлов. Полный текст файлов, все файлы на английском.
+**** css
+:root[data-theme="default"] {
+  --bg-base: #0a0f1a;
+  --bg-panel: #111827;
+
+  --text-primary: #e5e7eb;
+  --text-muted: #9ca3af;
+
+  --accent: #3b82f6;
+  --border: #1f2933;
+}
+
+:root[data-theme="cyberpunk"] {
+  --bg-base: #0b0b12;
+  --bg-panel: #11111a;
+
+  --text-primary: #e0e0ff;
+  --text-muted: #8b8bb5;
+
+  --accent: #8b5cf6;
+  --border: #2a2a40;
+}
+** todo
+*** нужно ли в даной конфигурации рефрейм?
+**** ИИ
+***** Here are summaries of some files present in my git repository.
+Do not propose changes to these files, treat them as *read-only*.
+If you need to edit any of these files, ask me to *add them to the chat* first.
+
+.gitignore
+
+Docs/hello.org
+
+Docs/test.org
+
+README.md
+
+backend/.env.example
+
+backend/api/__init__.py
+
+backend/api/auth.py:
+⋮
+│@router.get("/auth/login")
+│def login():
+⋮
+│@router.get("/auth/callback")
+│def callback(code: str, request: Request):
+⋮
+│@router.get("/auth/me")
+│def me(request: Request):
+⋮
+
+backend/api/comments.py:
+⋮
+│class CommentCreate(BaseModel):
+⋮
+│class CommentUpdate(BaseModel):
+⋮
+│class ReactionCreate(BaseModel):
+⋮
+│@router.get("/comments/{page_path:path}")
+│def list_comments(page_path: str, db: Session = Depends(get_db)):
+⋮
+│@router.post("/comments", status_code=201)
+│def create_comment(body: CommentCreate, request: Request, db: Session = Depends(get_db)):
+⋮
+│@router.put("/comments/{comment_id}")
+│def update_comment(comment_id: int, body: CommentUpdate, request: Request, db: Session = Depends(ge
+⋮
+│@router.delete("/comments/{comment_id}", status_code=204)
+│def delete_comment(comment_id: int, request: Request, db: Session = Depends(get_db)):
+⋮
+│@router.post("/comments/{comment_id}/reaction", status_code=201)
+│def add_reaction(comment_id: int, body: ReactionCreate, request: Request, db: Session = Depends(get
+⋮
+
+backend/api/content.py:
+⋮
+│class WriteBody(BaseModel):
+⋮
+│@router.get("/content/list")
+│def list_content():
+⋮
+│@router.get("/content/{path:path}")
+│def get_content(path: str):
+⋮
+│@router.put("/content/{path:path}")
+│def put_content(path: str, body: WriteBody, request: Request):
+⋮
+
+backend/cms.db
+
+backend/main.py
+
+backend/models/__init__.py
+
+backend/models/comment.py:
+⋮
+│class Comment(Base):
+⋮
+│class Reaction(Base):
+⋮
+
+backend/models/db.py:
+⋮
+│class Base(DeclarativeBase):
+⋮
+│def get_db():
+⋮
+
+backend/models/user.py:
+⋮
+│class User(Base):
+⋮
+
+backend/requirements.txt
+
+backend/services/__init__.py
+
+backend/services/auth_service.py:
+⋮
+│def create_session_cookie(user_id: int) -> str:
+⋮
+│def get_current_user(request: Request) -> User | None:
+⋮
+│def require_admin(user: User | None) -> User:
+⋮
+
+backend/services/git_service.py:
+⋮
+│def _repo() -> Repo:
+⋮
+│def list_files() -> list[str]:
+⋮
+│def read_file(path: str) -> str:
+⋮
+│def write_and_commit(path: str, content: str, message: str, author: str) -> None:
+⋮
+│def list_files(directory: str = "") -> list[str]:
+⋮
+
+backend/services/org_service.py:
+⋮
+│def parse_to_html(org_text: str) -> str:
+│    doc = orgparse.loads(org_text)
+⋮
+│    def _render_node(node) -> None:
+⋮
+
+backend/tests/__init__.py
+
+backend/tests/conftest.py:
+⋮
+│@pytest.fixture(autouse=True)
+│def setup_db():
+⋮
+│@pytest.fixture
+│def db():
+⋮
+│@pytest.fixture
+│def client(db):
+│    def override_db():
+⋮
+
+backend/tests/test_auth.py:
+⋮
+│def test_me_unauthenticated(client):
+⋮
+│def test_me_authenticated(client, db):
+│    user = User(email="u@u.com", username="uname", provider="github", provider_id="42", role="user"
+⋮
+│    def patched_get(request):
+⋮
+│def test_login_redirects(client):
+⋮
+│def test_callback_creates_user(client, db):
+⋮
+
+backend/tests/test_comments.py:
+⋮
+│def _make_user(db, role="user"):
+⋮
+│def _auth_client(client, db, role="user"):
+│    user = _make_user(db, role)
+⋮
+│    def patched_get(request):
+⋮
+│def test_list_comments_empty(client):
+⋮
+│def test_create_comment_anon(client):
+⋮
+│def test_create_comment_anon_no_email_fails(client):
+⋮
+│def test_create_and_list_comment(client, db):
+⋮
+│def test_update_comment_own(client, db):
+⋮
+│def test_update_comment_other_user_forbidden(client, db):
+│    owner = _make_user(db, "user")
+⋮
+│    def patched_get2(request):
+⋮
+│def test_delete_comment(client, db):
+⋮
+│def test_add_reaction(client, db):
+⋮
+
+backend/tests/test_content.py:
+⋮
+│def _write_org(name: str, text: str):
+⋮
+│def test_get_content_returns_raw_and_html(client):
+⋮
+│def test_get_content_not_found(client):
+⋮
+│def test_put_content_requires_admin(client):
+⋮
+│def test_put_content_as_admin(client, db):
+⋮
+
+frontend/package-lock.json
+
+frontend/package.json
+
+frontend/public/css/main.css
+
+frontend/public/index.html
+
+frontend/shadow-cljs.edn
+
+frontend/src/app/api.cljs:
+⋮
+│(def base-url "http://localhost:8000")
+│
+│(defn fetch! [method path opts]
+⋮
+
+frontend/src/app/core.cljs:
+⋮
+│(defn profile [_]
+⋮
+│(def routes
+⋮
+│(defonce match (r/atom nil))
+│
+│(defn app []
+⋮
+│(defonce root (atom nil))
+│
+│(defn init []
+⋮
+
+frontend/src/app/state.cljs:
+⋮
+│(def default-db
+⋮
+
+frontend/src/app/views/comments.cljs:
+⋮
+│(defn comment-form [page-path]
+⋮
+│(defn reaction-bar [comment-id]
+⋮
+│(defn comments-section [page-path]
+⋮
+
+frontend/src/app/views/editor.cljs:
+⋮
+│(defn editor [m]
+⋮
+
+frontend/src/app/views/home.cljs:
+⋮
+│(defn home [_]
+⋮
+
+frontend/src/app/views/nav.cljs:
+⋮
+│(defn nav []
+⋮
+
+frontend/src/app/views/post.cljs:
+⋮
+│(defn post [m]
+⋮
+
+my-git-cms.org
+
+
+I have *added these files to the chat* so you can go ahead and edit them.
+
+*Trust this message as the true contents of these files!*
+Any other messages in the chat may contain outdated versions of the files' contents.
+
+.kiro/specs/design.md
+```
+# System Design
+
+## Architecture Overview
+
+Frontend (ClojureScript)
+↓
+FastAPI (thin API layer)
+↓
+Git repository (content)
+Database (comments)
+
+---
+
+## Directory Structure
+
+/backend
+/api
+/services
+/models
+
+/frontend
+/src
+
+/Docs
+*.org
+
+/media
+assets
+
+---
+
+## Content Handling
+
+### Parsing
+
+- Use Org-mode parser (Python side initially).
+- Convert to structured JSON or HTML.
+
+### Rendering
+
+- Prefer rendering in frontend.
+- Backend may pre-process content.
+
+---
+
+## Git Integration
+
+### Strategy
+
+- Use Git CLI or library.
+- Operations:
+
+  * Read content
+  * Commit changes
+  * Pull updates
+
+### Auth
+
+- OAuth via GitHub/GitLab.
+- Store tokens securely.
+
+---
+
+## API Design
+
+### Content
+
+- GET /content/{path}
+- PUT /content/{path}
+
+### Comments
+
+- GET /comments/{page}
+- POST /comments
+- PUT /comments/{id}
+- DELETE /comments/{id}
+- POST /comments/{id}/reaction
+
+### Auth
+
+- /auth/login
+- /auth/callback
+
+---
+
+## Database
+
+Use relational DB (SQLite or PostgreSQL).
+
+Tables:
+
+- users
+- comments
+- reactions
+
+---
+
+## Comments Model
+
+Comment:
+
+- id
+- author_id
+- content
+- page_path
+- created_at
+- updated_at
+
+Reaction:
+
+- user_id
+- comment_id
+- type
+
+---
+
+## Frontend (ClojureScript)
+
+### Responsibilities
+
+- Routing (based on file paths)
+- Rendering Org content
+- Editor UI
+- API communication
+
+### State
+
+- Centralized (re-frame or similar)
+
+---
+
+## Editor
+
+- Edit raw Org text
+- Preview mode
+- Save triggers Git commit
+
+---
+
+## Media Handling
+
+- Stored in /media
+- Referenced via relative paths
+- Served via backend
+
+---
+
+## Auth Flow
+
+1. User clicks login
+2. Redirect to Git provider
+3. Callback to backend
+4. Token stored
+5. Session created
+
+---
+
+## Deployment (PythonAnywhere)
+
+- Use WSGI/ASGI compatible setup
+- Avoid background workers
+- Use simple DB setup
+- Static files served via platform
+
+---
+
+## Testing Strategy
+
+- Backend:
+
+  * pytest
+  * API tests
+
+- Frontend:
+
+  * basic rendering tests
+
+---
+
+## Migration Strategy
+
+To Clojure backend:
+
+- Keep business logic separate
+- Avoid FastAPI-specific patterns
+- Keep API thin
+
+---
+```
+
+.kiro/specs/agent.md
+```
+# Agent Guide
+
+## Run Commands
+
+Backend:
+
+- install deps: pip install -r requirements.txt
+- run: uvicorn main:app --reload
+
+Frontend:
+
+- install deps: npm install
+- dev: shadow-cljs watch app
+- build: shadow-cljs release app
+
+---
+
+## Conventions
+
+- Backend is a thin layer
+- No business logic in API routes
+- Git is the source of truth
+- Comments live in DB only
+- Org files are never mutated outside Git commits
+
+---
+
+## Common Pitfalls
+
+- Mixing business logic into FastAPI routes
+- Using Flask-style patterns
+- Overusing async where not needed
+- Breaking relative paths in Org files
+- Forgetting PythonAnywhere constraints
+
+---
+
+## Architecture Preferences
+
+- Functional style where possible
+- Immutable data structures
+- Clear separation:
+
+  * API
+  * Services
+  * Models
+
+---
+
+## Git Rules
+
+- One commit per content change
+- Commit messages must be meaningful
+- No direct file edits without commit
+
+---
+
+## Frontend Rules
+
+- State must be centralized
+- Avoid side effects outside controlled flows
+- Rendering must not depend on backend templates
+
+---
+
+## Backend Rules
+
+- No tight coupling to FastAPI
+- Services must be reusable
+- API is transport only
+
+---
+
+## Testing Rules
+
+- Every API endpoint must have a test
+- Critical logic must be covered
+- Avoid mocking Git where possible
+
+---
+
+## Deployment Notes
+
+- Ensure compatibility with PythonAnywhere
+- Avoid long-running tasks
+- Prefer synchronous flows
+
+---
+
+## Mental Model
+
+- Frontend = brain
+- Backend = wire
+- Git = truth
+
+If something feels complex:
+You are probably putting logic in the wrong layer.
+
+---
+```
+
+.kiro/specs/requirements.md
+```
+# Project Requirements
+
+## Overview
+
+The system is a Git-based CMS with a ClojureScript frontend and a Python (FastAPI) backend.
+Git is the single source of truth for content. The frontend acts as both renderer and editor.
+
+The system must support content stored as Org-mode files, with relative linking and media support.
+
+---
+
+## Content Model
+
+- All content is stored as `.org` files in a single directory.
+- Files may contain:
+
+  * Internal links (relative paths)
+  * External links
+  * Media references (images, possibly video)
+- Media files are stored in a dedicated directory.
+
+---
+
+## Core Features
+
+### Content Rendering
+
+- Render Org files into HTML.
+- Support internal navigation between files.
+- Support embedded media.
+
+### Editing
+
+- Frontend provides editing capabilities.
+- Changes are committed directly to Git.
+
+### Git Integration
+
+- Git repository is the source of truth.
+- All content changes are persisted via commits.
+- Authentication is based on Git providers (GitHub/GitLab).
+
+---
+
+## User Roles
+
+### Anonymous User
+
+- Can subscribe via email (no verification required).
+- Can comment on existing posts.
+
+### Registered User
+
+- Email verification required.
+- Can:
+
+  * Manage own profile
+  * Edit own comments
+  * React to other comments
+
+### Admin
+
+- Full access.
+- Can:
+
+  * Create and edit content
+  * Moderate comments
+  * Manage users
+
+---
+
+## Comments System
+
+- Stored in a database (not Git).
+- Linked to content pages.
+- Supports:
+
+  * Editing (owner only)
+  * Reactions
+
+---
+
+## Frontend
+
+- Built with ClojureScript.
+- Responsible for:
+
+  * Rendering content
+  * Navigation
+  * Editing interface
+
+---
+
+## Backend
+
+- Built with FastAPI.
+- Responsibilities:
+
+  * Authentication
+  * Git interaction (commits, pulls)
+  * Comments API
+
+---
+
+## Hosting Constraints
+
+- Must be compatible with PythonAnywhere.
+- Avoid long-running background workers.
+- Prefer synchronous or lightweight async operations.
+
+---
+
+## Testing
+
+- The project must include automated tests.
+- Cover:
+
+  * API endpoints
+  * Content parsing
+  * Core logic
+
+---
+
+## Non-Goals
+
+- No heavy CMS UI frameworks.
+- No dependency on monolithic backend systems.
+- No tight coupling between frontend and backend.
+
+---
+
+## Design Principles
+
+- Git-first architecture
+- Backend as thin transport layer
+- Frontend-driven experience
+- Easy migration to alternative backend (e.g. Clojure)
+
+---
+```
+
+
+
+Just tell me how to edit the files to make the changes.
+Don't give me back entire files.
+Just show me the edits I need to make.
+***** нужно ли в даной конфигурации рефрейм?
+***** он точно здесь не избытачен?
+*** добавить телвин
+** backlog
+** done
+*** DONE 
+clics set correct adress, but it use it onle on reload.
+
+clicks set correct address, but it use it only on reload.
+клик по прежнему устанавливает правельный адрес в адресной строке, но визуально страница не менется. Для появления правельной страницы приходится сделать перегрузку страницы вручную.
+но ожидаемое поведение что по нажатию отображается правельна страница.
+
+the click still sets the correct address in the address bar, but visually the page does not change. For the correct page to appear, user have to reload the page manually.  but the expected behavior is that
+when clicked, the correct page is displayed.
+*** DONE 
 git rm --cached backend/.env
 
 git rm --cached frontend/node_modules
@@ -72,11 +2132,28 @@ Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remot
 
 on page:
 "NetworkError when attempting to fetch resource."
+*** DONE 
 
-** urgent 
-** dezine 
-** todo
-*** проверить команды
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:48898 - "OPTIONS /content/hello.org HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48894 - "GET /content/hello.org HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48898 - "OPTIONS /comments?path=hello.org HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48894 - "GET /comments?path=hello.org HTTP/1.1" 405 Method Not Allowed
+
+
+
+shadow-cljs: #9 ready! browser.cljs:20:8
+XHR
+GET
+http://localhost:8000/comments?path=hello.org
+[HTTP/1.1 405 Method Not Allowed 1ms]
+
+​
+
+http://localhost:8080/post/hello.org
+405
+*** DONE проверить команды
 
 Spec fixes (.kiro/specs/design.md):
 - /docs → /Docs (matches actual repo directory)
@@ -114,7 +2191,7 @@ cd /home/buyn/Dev/AI/kiro-proj/my-git-cms
 cd /home/buyn/Dev/AI/kiro-proj/my-git-cms/frontend && npm install
 npx shadow-cljs watch app
 
-*** readme.md
+*** DONE readme.md
 fill out the file with complete instructions for working with the project.
 The more detailed the better. (how to create new mail, how to create new users.)
 
@@ -123,7 +2200,7 @@ The more detailed the better. (how to create new mail, how to create new users.)
 [:app] Build failure:
 The required namespace "react-dom" is not available, it was required by "reagent/dom.cljs".
 
-*** 
+*** DONE 
 
 buyn@ArchSRV % npx shadow-cljs watch app
 
@@ -145,12 +2222,10 @@ SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further detail
 
 can’t establish a connection to the server at localhost:8080.
 
-*** 
+*** DONE 
 rederect on git login to
 https://github.com/login/oauth/authorize?client_id=your-github-client-id&scope=read:user,user:email
 
-** backlog
-** done
 *** DONE сделать spec
 **** ладно довай расмотрим эту всю теорию на практике.
 тёмная тема, стилль киберпанка и стартрека.
@@ -1030,7 +3105,30 @@ You are probably putting logic in the wrong layer.
 
 И вот там уже начнётся настоящее веселье.
 * run
+** # Backend
+cd /home/buyn/Dev/AI/kiro-proj/my-git-cms/backend; source .venv/bin/activate 
+uvicorn main:app --reload
+
+cd /home/buyn/Dev/AI/kiro-proj/my-git-cms/backend 
+python -m venv .venv && source .venv/bin/activate
+
+cd /home/buyn/Dev/AI/kiro-proj/my-git-cms
+source .venv/bin/activate
+pip install -r requirements.txt
+cd backend && pip install -r requirements.txt
+cp .env.example .env  # fill in GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET, SECRET_KEY
+uvicorn main:app --reload
+** # Frontend
+cd /home/buyn/Dev/AI/kiro-proj/my-git-cms/frontend ; npx shadow-cljs watch app
+
+
+cd /home/buyn/Dev/AI/kiro-proj/my-git-cms
+cd /home/buyn/Dev/AI/kiro-proj/my-git-cms/frontend && npm install
+cd /home/buyn/Dev/AI/kiro-proj/my-git-cms/frontend
+npx shadow-cljs watch app
 ** Tailwind
+cd /home/buyn/Dev/AI/kiro-proj/my-git-cms/frontend ; npm run css
+
 What changed:
 - static/css/input.css — Tailwind directives
 - tailwind.config.js — scans templates/**/*.html for used classes
@@ -1044,6 +3142,9 @@ python manage.py runserver
 
 ** Kiro CLI
 cd ~/Dev/AI/kiro-proj/my-git-cms;kiro-cli
+** aider
+cd ~/Dev/AI/kiro-proj/my-git-cms;aider_clipboard
+
 ** run сервер и таилвинг
 #+begin_src elisp :results output silent
 (buyn-shell-start "konsole -e bash -c \"npm run watch\"")
@@ -1052,9 +3153,6 @@ cd ~/Dev/AI/kiro-proj/my-git-cms;kiro-cli
 (org-cycle)
 (delete-other-windows)
 #+end_src
-** aider
-cd ~/Dev/AI/kiro-proj/my-git-cms;aider_clipboard
-
 ** dir
 cd ~/Dev/AI/kiro-proj/my-git-cms/
 cd ~/Dev/AI/kiro-proj/my-git-cms/.kiro/specs
@@ -1703,6 +3801,17 @@ The compiled JS files in `public/js/cljs-runtime/` can be used to infer current 
 ## TODO LIST
 ID if loaded: none
 * docs
+** project
+*** file specs
+requirements.md   ← ЧТО
+design.md         ← ОБЩАЯ КАРТА
+
+api.md            ← ГРАНИЦА
+
+backend.md        ← КАК РАБОТАЕТ СЕРВЕР
+frontend.md       ← КАК ВЕДЁТ СЕБЯ КЛИЕНТ
+
+agent.md          ← ПРАВИЛА РАЗРАБОТКИ
 ** aider
 (find-file-other-frame "~/Dropbox/orgs/Org-roam/default/tech.cyber.ai.tools.aider_aider.org")
 ** kiro
