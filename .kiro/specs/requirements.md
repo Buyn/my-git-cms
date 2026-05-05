@@ -44,6 +44,18 @@ The system must support content stored as Org-mode files, with relative linking 
 
 ---
 
+## Admin Content Management
+
+Admin users must have access to content management capabilities directly from the frontend.
+
+This includes:
+
+- Editing existing pages
+- Creating new pages
+- Navigating to edit mode from the content view
+```
+
+---
 ## User Roles
 
 ### Anonymous User

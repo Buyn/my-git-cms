@@ -53,6 +53,15 @@ Tables:
 
 ---
 
+## Content Creation
+
+- Creating new content is done via PUT /content/{path}
+- Backend must:
+  - Create file if not exists
+  - Commit change to Git
+
+---
+
 ## Constraints
 
 - Must work on PythonAnywhere

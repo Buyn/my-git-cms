@@ -176,6 +176,58 @@ All components must:
 
 ---
 
+## Admin Editing Experience
+
+### Edit Existing Content
+
+- If the current user is admin:
+  - Viewing a page must provide an "Edit" action
+  - Edit action switches the page into editor mode
+
+- Editor loads:
+  - raw Org content
+  - preview mode
+
+---
+
+### Create New Content
+
+- Admin must have access to "New Post" action in UI
+
+Possible locations:
+- Navigation bar
+- Admin panel section
+
+---
+
+### Editor Flow
+
+Edit existing:
+1. Open page
+2. Click "Edit"
+3. Modify content
+4. Save → API call
+
+Create new:
+1. Click "New Post"
+2. Enter path/slug
+3. Enter content
+4. Save → API call
+
+---
+
+### Permissions
+
+- Only admin can:
+  - Edit content
+  - Create content
+
+- Non-admin users:
+  - Must never see edit controls
+```
+
+---
+
 ## Comments UI
 
 - Display comments per page

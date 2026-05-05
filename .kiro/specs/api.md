@@ -26,11 +26,15 @@ Errors:
 
 ### PUT /content/{path}
 
-Updates content.
+Creates or updates content.
 
 Body:
 - content: string (Org text)
 - message: string (commit message)
+
+Behavior:
+- If file exists → update
+- If file does not exist → create new
 
 Rules:
 - Admin only
