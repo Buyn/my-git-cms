@@ -22,9 +22,8 @@ Frontend:
 
 - Backend is a thin layer
 - No business logic in API routes
-- Git is the source of truth
+- GitHub repository (via API) is the source of truth
 - Comments live in DB only
-- Org files are never mutated outside Git commits
 
 ---
 
@@ -49,10 +48,9 @@ Frontend:
 
 ---
 
-## Git Rules
+## Github Rules
 
 - One commit per content change
-- Commit messages must be meaningful
 - No direct file edits without commit
 
 ---
@@ -77,7 +75,7 @@ Frontend:
 
 - Every API endpoint must have a test
 - Critical logic must be covered
-- Avoid mocking Git where possible
+- Mocking Github where possible
 
 ---
 
@@ -93,7 +91,7 @@ Frontend:
 
 - Frontend = brain
 - Backend = wire
-- Git = truth
+- Github = truth
 
 If something feels complex:
 You are probably putting logic in the wrong layer.

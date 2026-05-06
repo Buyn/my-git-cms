@@ -6,14 +6,14 @@ Frontend (ClojureScript + TailwindCSS)
 ↓
 Backend API (FastAPI - thin layer)
 ↓
-Git (content)
+GitHub (content)
 Database (comments)
 
 ---
 
 ## Core Principles
 
-- Git is the only source of truth for content
+- GitHub Repository (remote source of truth, accessed via API)
 - Backend is a transport and integration layer
 - Frontend owns rendering and interaction
 - Clear separation between layers
@@ -23,7 +23,7 @@ Database (comments)
 ## Data Flow
 
 1. Frontend requests content
-2. Backend reads from Git
+2. Backend fetches content from GitHub API
 3. Backend returns raw + processed content
 4. Frontend renders and handles UI
 
@@ -102,7 +102,7 @@ Frontend:
 
 Backend:
 - Authentication
-- Git interaction
+- GitHub interaction
 - Comment persistence
 
 ---

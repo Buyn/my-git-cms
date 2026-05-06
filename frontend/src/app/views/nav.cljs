@@ -29,7 +29,7 @@
                    :class    "border border-DEFAULT text-muted px-3 py-1 rounded-sm
                               hover:border-accent hover:text-accent transition-colors"}
           "Logout"]]
-        [:a {:href  (str js/window.location.origin "/auth/login")
+        [:a {:href  (str api/base-url "/auth/login")
              :class "border border-accent text-accent px-3 py-1 rounded-sm
                     hover:bg-[var(--accent-dim)] transition-colors"}
          "Login"])

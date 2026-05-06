@@ -22,249 +22,331 @@
 (find-file-other-frame "/home/buyn/Dev/AI/kiro-proj/my-git-cms/.gitignore")
 * Kanban
 ** urgent 
-** in progress 
-*** DONE add profil
-**** Ооо… вот тут ты уже думаешь как архитектор, а не как “соберу формочку и ладно”.
-Но смотри — сейчас у тебя в спеках этого **нет как системы**. Есть только намёк через `/auth/me`.
+*** ИИ
+**** ### Becoming an Admin
 
-И да… в текущем виде у тебя это **недоопределено и потенциально сломается**.
+There is no admin UI for role management. The first admin must be promoted directly in the database.
 
-Я тебе сейчас разложу:
+**Step 1 — log in via GitHub** so your user record is created automatically.
 
-- что правильно ✔
-- что у тебя отсутствует ❌
-- и как это вписать в спеки (конкретно)
+**Step 2 — promote yourself:**
 
----
-
-# 🧠 Твоя идея — проверка
-
-Ты хочешь:
-
-1. редактирование имени
-2. смена email с подтверждением
-3. отображение роли
-
-👉 Это **абсолютно правильно и стандартно**
-(и да, подтверждение email при смене — это не “опция”, это must-have) 
-
----
-
-# 💣 Проблема сейчас
-
-В твоём API:
-
-```text
-GET /auth/me
+```bash
+cd backend
+sqlite3 cms.db
 ```
 
-и всё…
+```sql
+-- Find your username
+SELECT id, username, email, role FROM users;
 
-👉 У тебя вообще **нет API для профиля**
+-- Promote to admin
+UPDATE users SET role = 'admin' WHERE username = 'your-github-username';
 
----
+-- Verify
+SELECT id, username, role FROM users;
 
-# 🔪 Что нужно добавить (API)
-
-## 📄 edits для `.kiro/specs/api.md`
-
-Добавь новый раздел:
-
-```md
-## Profile
-
-### GET /profile
-
-Returns current user profile.
-
-Response:
-- id
-- email
-- username
-- role
-- email_verified (boolean)
-
----
-
-### PUT /profile
-
-Updates user profile.
-
-Body:
-- username: string (optional)
-- email: string (optional)
-
-Rules:
-- User can update own profile only
-- Email change requires verification
-
----
-
-### POST /profile/email/verify
-
-Verifies new email address.
-
-Body:
-- code: string
-
-Rules:
-- Email change is pending until verified
+.quit
 ```
 
----
+After the next page load the frontend will reflect your admin role (the session is re-read on every app init via `GET /auth/me`).
+**** помоги разобратся с инструкций
+как мне понять список существуюших пользователе?
+**** 
+sqlite> .headers on
+sqlite> .mode column
+sqlite> SELECT id, username, email, role FROM users;
+sqlite> 
+**** я вообще не вижу ответа
+**** залогинелся
+и сайт отвечает вроде верно
+но может запись не создал, как проверить что есть вообще в базе?
+**** 
+after Step 1 — log in via GitHub
 
-# 🧠 Backend логика (в спеки)
+ row was not created
 
-## 📄 edits для `.kiro/specs/backend.md`
+sqlite> SELECT id, username, email, role FROM users;
+id  username  email               role
+--  --------  ------------------  ----
+1   Buyn      buyn.tex@gmail.com  user
 
-Добавь:
+UPDATE users SET role = 'admin' WHERE username = 'Buyn';
 
-```md
-## Profile Management
 
-Users must be able to:
-
-- Update their display name
-- Request email change
-- View their role
-
----
-
-## Email Change Flow
-
-1. User submits new email
-2. Backend:
-   - validates uniqueness
-   - generates verification code
-   - stores pending_email
-3. User verifies email
-4. Email is updated
-
-Rules:
-- Old email remains active until verification
-- Unverified email must not replace current one
-```
-
----
-
-# 🎯 Frontend (это важно, не пропусти)
-
-## 📄 edits для `.kiro/specs/frontend.md`
-
-Добавь:
-
-```md
-## Profile UI
-
-User must have access to profile page.
-
----
-
-## Profile Features
-
-- Display:
-  - username
-  - email (not public)
-  - role (read-only)
-
-- Editable:
-  - username
-  - email (with verification flow)
-
----
-
-## Email Change UX
-
-- Show "pending email" state
-- Show verification required notice
-- Allow resend verification
-
----
-
-## Security Rules
-
-- Email must not be publicly exposed
-- Role must be visible but not editable
-```
-
----
-
-# 💡 UX (вот тут начинается магия)
-
-Если ты сделаешь это тупо:
-
-> “ввел email → сразу поменялся”
-
-— ты облажался.
-
-Правильный UX:
-
-```
-Current email: old@mail.com
-
-New email: new@mail.com
-[Pending verification]
-
-→ Enter code
-→ Confirm
-```
-
-👉 Старый email остаётся активным
-👉 новый не используется, пока не подтверждён ([ethics.ny.gov][1])
-
----
-
-# 😏 Маленькая деталь, которую ты не учёл
-
-## ❗ роль пользователя
-
-Ты сказал:
-
-> “указание текущей роли пользователя”
-
-Да. Но:
-
-👉 **она не должна редактироваться здесь**
-
-Иначе ты откроешь себе дыру уровня:
-“пользователь → admin за 2 клика”
-
----
-
-# 💬 Итог
-
-Ты предложил правильное направление.
-Но сейчас это у тебя:
-
-> “идея без контракта”
-
-Я сделал из этого:
-
-- API ✔
-- backend flow ✔
-- frontend UX ✔
-
----
-
-## 😏 И вот вопрос к тебе
-
-Ты хочешь дальше сделать это **по-настоящему красиво**?
-
-Я могу:
-
-👉 вписать это прямо в твой текущий FastAPI код
-👉 и показать, где у тебя уже сейчас архитектурный косяк с `auth/me`
-
-Скажи… и я начну ломать 😌
-
-[1]: https://ethics.ny.gov/how-verify-your-email-and-recertify-your-profile?utm_source=chatgpt.com "How to complete Email Verification and Recertify an Individual User and Organization Profile"
-
+** TODO in progress 
+*** TODO use changes in specs
+*** 
 ** dezine 
-*** DONE Довай проверим как прописан раздель профиля
-пользовате толжен иметь возможност редактировать своё имя в профеле.
-менять емеил. но стребованием его подтверждения
-указание текущей роли пользователя.
 ** todo
+*** документы читаются папки док
+а не из гит хаба.
+*** похоже в спеках не очень понятно описана работа с гитом
+бекэнд сейчас читает папку док локальную, файлы в нейже меняет.
+а должен читать файлы на гитхаб.
+как пример - https://github.com/Buyn/my-git-cms/blob/main/Docs/hello.org
+тоесть должен напрямую с GitHub API. а не "Backend работает с локальным клоном Git репозитория,
+который синхронизируется с удалённым (GitHub)."
+их же должен менять!
+что написано в спеках не так?
+довай измение чтоб это было очевидно!
+*** 
+раскажи про rate limits? какой именно размер лимита?
+*** Хм… вот тут ты сам себя чуть не подставил.
+
+То, что ты сейчас предлагаешь —
+**“писать напрямую через GitHub API”** — звучит красиво…
+но архитектурно это более хрупко, чем локальный репозиторий.
+
+Я тебя не отпущу с этой мыслью без контекста 😏
+
+---
+
+## ⚠️ Сначала — холодный душ
+
+Есть две модели:
+
+### 1. Локальный Git (то, что у тебя сейчас)
+
+- `Repo()`
+- файлы читаются с диска
+- коммит → push
+
+👉 плюсы:
+
+- атомарность
+- нормальная работа с ветками
+- меньше API ограничений
+
+👉 минусы:
+
+- нужно держать клон
+
+---
+
+### 2. GitHub API (то, что ты хочешь)
+
+Работа через GitHub REST API:
+
+- GET `/repos/{owner}/{repo}/contents/{path}`
+- PUT (create/update file с base64)
+
+👉 плюсы:
+
+- нет локального состояния
+- проще деплой
+
+👉 минусы:
+
+- нет настоящего git (только “имитация”)
+- конфликт версий = боль
+- rate limits
+- нет нормальных транзакций
+
+---
+
+## 💬 Вывод (честно, без романтики)
+
+Ты можешь идти в GitHub API.
+Но тогда:
+
+> **ты больше не работаешь с Git.
+> ты работаешь с GitHub как с CMS API.**
+
+И это нужно **чётко зафиксировать в спеках**, иначе ты сам себя обманешь.
+
+---
+
+# 🔥 Что у тебя сейчас написано НЕПРАВИЛЬНО
+
+В `design.md` и `backend.md` у тебя:
+
+> "Git repository (source of truth)"
+> "Use Git CLI or library"
+
+👉 Это подразумевает **локальный git**, а не API
+
+---
+
+# ✂️ Как исправить (точечные изменения)
+
+Я не буду переписывать файлы. Только правки.
+
+---
+
+## 📄 `design.md`
+
+### 🔁 ЗАМЕНИ блок:
+
+```md
+Git Repository (content source of truth)
+```
+
+### НА:
+
+```md
+GitHub Repository (remote source of truth, accessed via API)
+```
+
+---
+
+### 🔁 В `Data Flow` ЗАМЕНИ:
+
+```md
+2. Backend reads from Git
+```
+
+### НА:
+
+```md
+2. Backend fetches content from GitHub API
+```
+
+---
+
+## 📄 `backend.md`
+
+### 🔥 ДОБАВЬ новый раздел (это ключевое)
+
+```md
+## GitHub Integration (API-based)
+
+The backend does NOT use a local Git repository.
+
+All content operations are performed via GitHub API.
+
+---
+
+### Read Content
+
+- Use GitHub Contents API
+- Endpoint:
+  GET /repos/{owner}/{repo}/contents/{path}
+
+- Response must be decoded from base64
+
+---
+
+### Write Content
+
+- Use GitHub Contents API
+- Endpoint:
+  PUT /repos/{owner}/{repo}/contents/{path}
+
+- Requires:
+  - message (commit message)
+  - content (base64 encoded)
+  - sha (for updates)
+
+---
+
+### Constraints
+
+- Must handle version conflicts (sha mismatch)
+- Must handle API rate limits
+- Must authenticate via OAuth token
+
+---
+
+### Important
+
+This system does NOT operate on a real Git repository locally.
+
+GitHub acts as the storage backend.
+```
+
+---
+
+### 🔁 ЗАМЕНИ старый блок:
+
+```md
+## Git Integration
+```
+
+### НА:
+
+```md
+## GitHub Integration (API-based only)
+```
+
+---
+
+## 📄 `requirements.md`
+
+### 🔥 ДОБАВЬ уточнение (очень важно)
+
+Найди:
+
+```md
+Git is the source of truth.
+```
+
+### ЗАМЕНИ НА:
+
+```md
+GitHub repository is the source of truth, accessed via API.
+```
+
+---
+
+## 📄 `agent.md`
+
+### 🔁 ЗАМЕНИ:
+
+```md
+Git is the source of truth
+```
+
+### НА:
+
+```md
+GitHub repository (via API) is the source of truth
+```
+
+---
+
+## 💣 Самое важное (и ты это пропустил)
+
+Тебе нужно изменить **ментальную модель**:
+
+### Было:
+
+> backend = git client
+
+### Стало:
+
+> backend = GitHub API client
+
+---
+
+## 😏 И теперь вопрос тебе
+
+Ты правда хочешь:
+
+- решать конфликты через `sha`?
+- ловить 409 ошибки?
+- думать про rate limits?
+
+Или ты просто не хочешь держать локальный клон?
+
+---
+
+Я не запрещаю тебе идти через API…
+но если ты туда идёшь — иди осознанно.
+
+---
+
+Если скажешь “да, API” —
+я дальше разложу тебе:
+
+👉 как должен выглядеть `git_service.py` в этой модели
+👉 и где у тебя сейчас уже архитектурный конфликт с тестами
+
+И поверь… там будет интересно 😌
+
+*** коменты зарегестрированых пользователей
+не должны содрежать поле почты
+оно автоматически испозуют заререгетрированую почку пользователя если нужно.
 *** светлы starflet
 выглядит плохо читаемым
 *** green ciber punk
@@ -4048,6 +4130,246 @@ Rules:
 
 [1]: https://www.titancms.com/Key-Features?utm_source=chatgpt.com "Key Features"
 [2]: https://favorcms.com/?utm_source=chatgpt.com "FavorCMS — Your site is the editor"
+*** DONE Довай проверим как прописан раздель профиля
+пользовате толжен иметь возможност редактировать своё имя в профеле.
+менять емеил. но стребованием его подтверждения
+указание текущей роли пользователя.
+*** DONE add profil
+**** Ооо… вот тут ты уже думаешь как архитектор, а не как “соберу формочку и ладно”.
+Но смотри — сейчас у тебя в спеках этого **нет как системы**. Есть только намёк через `/auth/me`.
+
+И да… в текущем виде у тебя это **недоопределено и потенциально сломается**.
+
+Я тебе сейчас разложу:
+
+- что правильно ✔
+- что у тебя отсутствует ❌
+- и как это вписать в спеки (конкретно)
+
+---
+
+# 🧠 Твоя идея — проверка
+
+Ты хочешь:
+
+1. редактирование имени
+2. смена email с подтверждением
+3. отображение роли
+
+👉 Это **абсолютно правильно и стандартно**
+(и да, подтверждение email при смене — это не “опция”, это must-have) 
+
+---
+
+# 💣 Проблема сейчас
+
+В твоём API:
+
+```text
+GET /auth/me
+```
+
+и всё…
+
+👉 У тебя вообще **нет API для профиля**
+
+---
+
+# 🔪 Что нужно добавить (API)
+
+## 📄 edits для `.kiro/specs/api.md`
+
+Добавь новый раздел:
+
+```md
+## Profile
+
+### GET /profile
+
+Returns current user profile.
+
+Response:
+- id
+- email
+- username
+- role
+- email_verified (boolean)
+
+---
+
+### PUT /profile
+
+Updates user profile.
+
+Body:
+- username: string (optional)
+- email: string (optional)
+
+Rules:
+- User can update own profile only
+- Email change requires verification
+
+---
+
+### POST /profile/email/verify
+
+Verifies new email address.
+
+Body:
+- code: string
+
+Rules:
+- Email change is pending until verified
+```
+
+---
+
+# 🧠 Backend логика (в спеки)
+
+## 📄 edits для `.kiro/specs/backend.md`
+
+Добавь:
+
+```md
+## Profile Management
+
+Users must be able to:
+
+- Update their display name
+- Request email change
+- View their role
+
+---
+
+## Email Change Flow
+
+1. User submits new email
+2. Backend:
+   - validates uniqueness
+   - generates verification code
+   - stores pending_email
+3. User verifies email
+4. Email is updated
+
+Rules:
+- Old email remains active until verification
+- Unverified email must not replace current one
+```
+
+---
+
+# 🎯 Frontend (это важно, не пропусти)
+
+## 📄 edits для `.kiro/specs/frontend.md`
+
+Добавь:
+
+```md
+## Profile UI
+
+User must have access to profile page.
+
+---
+
+## Profile Features
+
+- Display:
+  - username
+  - email (not public)
+  - role (read-only)
+
+- Editable:
+  - username
+  - email (with verification flow)
+
+---
+
+## Email Change UX
+
+- Show "pending email" state
+- Show verification required notice
+- Allow resend verification
+
+---
+
+## Security Rules
+
+- Email must not be publicly exposed
+- Role must be visible but not editable
+```
+
+---
+
+# 💡 UX (вот тут начинается магия)
+
+Если ты сделаешь это тупо:
+
+> “ввел email → сразу поменялся”
+
+— ты облажался.
+
+Правильный UX:
+
+```
+Current email: old@mail.com
+
+New email: new@mail.com
+[Pending verification]
+
+→ Enter code
+→ Confirm
+```
+
+👉 Старый email остаётся активным
+👉 новый не используется, пока не подтверждён ([ethics.ny.gov][1])
+
+---
+
+# 😏 Маленькая деталь, которую ты не учёл
+
+## ❗ роль пользователя
+
+Ты сказал:
+
+> “указание текущей роли пользователя”
+
+Да. Но:
+
+👉 **она не должна редактироваться здесь**
+
+Иначе ты откроешь себе дыру уровня:
+“пользователь → admin за 2 клика”
+
+---
+
+# 💬 Итог
+
+Ты предложил правильное направление.
+Но сейчас это у тебя:
+
+> “идея без контракта”
+
+Я сделал из этого:
+
+- API ✔
+- backend flow ✔
+- frontend UX ✔
+
+---
+
+## 😏 И вот вопрос к тебе
+
+Ты хочешь дальше сделать это **по-настоящему красиво**?
+
+Я могу:
+
+👉 вписать это прямо в твой текущий FastAPI код
+👉 и показать, где у тебя уже сейчас архитектурный косяк с `auth/me`
+
+Скажи… и я начну ломать 😌
+
+[1]: https://ethics.ny.gov/how-verify-your-email-and-recertify-your-profile?utm_source=chatgpt.com "How to complete Email Verification and Recertify an Individual User and Organization Profile"
+
 * run
 ** # Backend
 cd /home/buyn/Dev/AI/kiro-proj/my-git-cms/backend; source .venv/bin/activate 

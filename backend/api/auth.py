@@ -13,6 +13,7 @@ router = APIRouter()
 
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID", "")
 GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET", "")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:8080")
 GITHUB_AUTH_URL = "https://github.com/login/oauth/authorize"
 GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token"
 GITHUB_USER_URL = "https://api.github.com/user"
@@ -68,7 +69,7 @@ def callback(code: str, request: Request):
     finally:
         db.close()
 
-    response = RedirectResponse(url="/")
+    response = RedirectResponse(url=f"{FRONTEND_URL}/")
     response.set_cookie(COOKIE_NAME, cookie, httponly=True, samesite="lax")
     return response
 

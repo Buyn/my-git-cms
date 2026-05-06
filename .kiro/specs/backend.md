@@ -3,7 +3,7 @@
 ## Responsibilities
 
 - Authentication
-- Git operations
+- GitHub API-operations
 - Comments persistence
 
 ---
@@ -12,6 +12,54 @@
 
 - Returns raw + optional HTML
 - No styling responsibility
+
+---
+
+## GitHub Integration (API-based)
+
+The backend does NOT use a local Git repository.
+
+All content operations are performed via GitHub API.
+
+---
+
+### Read Content
+
+- Use GitHub Contents API
+- Endpoint:
+  GET /repos/{owner}/{repo}/contents/{path}
+
+- Response must be decoded from base64
+
+---
+
+### Write Content
+
+- Use GitHub Contents API
+- Endpoint:
+  PUT /repos/{owner}/{repo}/contents/{path}
+
+- Requires:
+  - message (commit message)
+  - content (base64 encoded)
+  - sha (for updates)
+
+---
+
+### Constraints
+
+- Must handle version conflicts (sha mismatch)
+- Must handle API rate limits
+- Must authenticate via OAuth token
+
+---
+
+### Important
+
+This system does NOT operate on a real Git repository locally.
+
+GitHub acts as the storage backend.
+```
 
 ---
 

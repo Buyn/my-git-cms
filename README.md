@@ -101,6 +101,10 @@ GITHUB_CLIENT_SECRET=your-github-client-secret
 
 # SQLite database file (relative to backend/)
 DATABASE_URL=sqlite:///./cms.db
+
+# Frontend URL — used for post-login redirect
+# Change to your production domain when deploying
+FRONTEND_URL=http://localhost:8080
 ```
 
 The database and tables are created automatically on first run.

@@ -2,8 +2,8 @@
 
 ## Overview
 
-The system is a Git-based CMS with a ClojureScript frontend and a Python (FastAPI) backend.
-Git is the single source of truth for content. The frontend acts as both renderer and editor.
+The system is a Github-based CMS with a ClojureScript frontend and a Python (FastAPI) backend.
+GitHub repository, accessed via API, is the single source of truth for content. The frontend acts as both renderer and editor.
 
 The system must support content stored as Org-mode files, with relative linking and media support.
 
@@ -36,11 +36,11 @@ The system must support content stored as Org-mode files, with relative linking 
 - Admin users must be able to edit existing content pages.
 - Admin users must be able to create new content pages.
 
-### Git Integration
+### GitHub Integration
 
-- Git repository is the source of truth.
+- GitHub repository is the source of truth, accessed via API.
 - All content changes are persisted via commits.
-- Authentication is based on Git providers (GitHub/GitLab).
+- Authentication is based on GitHub providers.
 
 ---
 
@@ -110,7 +110,7 @@ This includes:
 - Responsibilities:
 
   * Authentication
-  * Git interaction (commits, pulls)
+  * Github interaction via API (commits, pulls)
   * Comments API
 
 ---
@@ -144,7 +144,7 @@ This includes:
 
 ## Design Principles
 
-- Git-first architecture
+- Github-first architecture
 - Backend as thin transport layer
 - Frontend-driven experience
 - Easy migration to alternative backend (e.g. Clojure)
